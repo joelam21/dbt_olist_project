@@ -1,0 +1,14 @@
+name: "dbt_olist_project"
+version: "1.0"
+config-version: 2
+
+profile: "dbt_olist_project"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+models:
+  +materialized: view
