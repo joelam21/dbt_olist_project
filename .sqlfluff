@@ -1,0 +1,91 @@
+# SQLFluff Configuration for dbt_olist_project
+# This file defines SQL linting and formatting standards
+# Documentation: https://docs.sqlfluff.com/en/stable/
+
+[sqlfluff]
+# Snowflake dialect for our dbt project
+dialect = snowflake
+templater = dbt
+
+# SQL formatting preferences
+max_line_length = 100
+indent_unit = space
+tab_space_size = 4
+large_file_skip_byte_limit = 40000
+
+# Template configuration for dbt
+[sqlfluff:templater:dbt]
+project_dir = .
+profiles_dir = ~/.dbt
+profile = dbt_olist_project
+target = dev
+
+# Rule configuration
+[sqlfluff:rules]
+# Capitalization rules
+capitalisation_policy = lower
+extended_capitalisation_policy = lower
+
+# Layout rules
+max_line_length = 100
+indent_unit = space
+tab_space_size = 4
+
+# Allow leading commas (popular dbt style)
+comma_style = leading
+
+# Enforce consistent aliasing
+allow_scalar = true
+single_table_references = consistent
+unqualified_column_reference = column
+
+[sqlfluff:rules:aliasing.table]
+# Table aliasing standards
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.column]
+# Column aliasing standards
+aliasing = explicit
+
+[sqlfluff:rules:capitalisation.keywords]
+# SQL keywords should be lowercase
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.identifiers]
+# Identifiers (table names, column names) should be lowercase
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+# Function names should be lowercase
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.literals]
+# String literals can be any case
+capitalisation_policy = consistent
+
+[sqlfluff:rules:layout.long_lines]
+# Line length enforcement
+ignore_comment_lines = true
+ignore_comment_clauses = true
+
+[sqlfluff:rules:references.consistent]
+# Enforce consistent table references
+single_table_references = consistent
+
+# Disable some rules that conflict with dbt patterns
+[sqlfluff:rules:references.from]
+# Allow FROM clauses without table aliases (common in dbt)
+force_enable = false
+
+[sqlfluff:rules:structure.subquery]
+# Allow subqueries without aliases (dbt CTEs)
+forbid_subquery_in = ()
+
+# Custom rules for dbt best practices
+[sqlfluff:rules:dbt.check_model_columns_have_desc]
+# Ensure model columns are documented
+manifest_path = target/manifest.json
+
+[sqlfluff:rules:dbt.check_model_has_description]
+# Ensure models have descriptions
+manifest_path = target/manifest.json

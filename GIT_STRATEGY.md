@@ -7,7 +7,7 @@ This document outlines the Git branching strategy for the dbt_olist_project to e
 
 ### Core Branches
 - **`main`** - Production-ready code only
-  - Protected branch 
+  - Protected branch
   - All code here should be deployment-ready
   - Only updated via pull requests from `develop`
   - Used for production deployments
@@ -71,7 +71,7 @@ This document outlines the Git branching strategy for the dbt_olist_project to e
 ## Commit Message Convention
 Use conventional commits for clear history:
 - `feat:` - New features
-- `fix:` - Bug fixes  
+- `fix:` - Bug fixes
 - `docs:` - Documentation updates
 - `style:` - Code formatting
 - `refactor:` - Code refactoring

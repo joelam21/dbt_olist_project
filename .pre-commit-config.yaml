@@ -1,0 +1,68 @@
+# Pre-commit hooks for dbt_olist_project
+# This file configures automated code quality checks that run before each commit
+# Documentation: https://pre-commit.com/
+
+repos:
+  # General code quality hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # File quality checks
+      - id: trailing-whitespace
+        description: Remove trailing whitespace
+      - id: end-of-file-fixer
+        description: Ensure files end with newline
+      - id: check-added-large-files
+        description: Prevent large files from being committed
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+        description: Check for case-sensitive filename conflicts
+      - id: check-merge-conflict
+        description: Check for merge conflict markers
+
+      # YAML and JSON validation
+      - id: check-yaml
+        description: Validate YAML files
+        args: ['--unsafe']  # Allow custom YAML tags used by dbt
+      - id: check-json
+        description: Validate JSON files
+
+  # SQL linting and formatting with SQLFluff
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 3.4.2
+    hooks:
+      - id: sqlfluff-lint
+        description: Lint SQL files for style and syntax issues
+        args: ['--dialect=snowflake']
+        additional_dependencies: ['sqlfluff-templater-dbt']
+        files: \.sql$
+      - id: sqlfluff-fix
+        description: Auto-fix SQL formatting issues
+        args: ['--dialect=snowflake']
+        additional_dependencies: ['sqlfluff-templater-dbt']
+        files: \.sql$
+
+  # Python code quality (for any Python scripts)
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        description: Format Python code with Black
+        language_version: python3.11
+
+# Configuration for pre-commit
+default_language_version:
+  python: python3.11
+
+# Skip these hooks on certain files
+exclude: |
+  (?x)^(
+    dbt_packages/.*|
+    logs/.*|
+    target/.*|
+    \.git/.*
+  )$
+
+# Performance optimization
+fail_fast: false  # Run all hooks even if one fails
+minimum_pre_commit_version: 3.0.0
