@@ -1,0 +1,396 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Simulated source layer — these tables were originally loaded from CSVs,
+      but are being treated as sources to mirror a production ingestion pipeline.
+    database: dbt_olist_project
+    schema: raw
+    tables:
+      - name: customers
+        description: |
+          Customer-level data including unique customer IDs, ZIP codes, and city-level location information.
+          **Assumptions:**
+            - customer_id is unique and not null.
+            - customer_unique_id is not null.
+            - customer_zip_code_prefix, customer_city, and customer_state are present for all customers.
+        columns:
+          - name: customer_id
+            description: |
+              {{ doc('customer_id_pk') }}
+              Assumption: Unique and not null.
+            tests:
+              - not_null
+              - unique
+          - name: customer_unique_id
+            description: |
+              {{ doc('customer_unique_id') }}
+              Assumption: Not null.
+          - name: customer_zip_code_prefix
+            description: |
+              {{ doc('customer_zip_code_prefix') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: customer_city
+            description: |
+              {{ doc('customer_city') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: customer_state
+            description: |
+              {{ doc('customer_state') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: orders
+        description: |
+          Order-level data including customer reference, order status, and multiple timestamps capturing the order lifecycle.
+          **Assumptions:**
+            - order_id is unique and not null.
+            - customer_id is not null.
+            - order_status and order_purchase_timestamp are always present and valid.
+            - order_estimated_delivery_date is present for all orders.
+        columns:
+          - name: order_id
+            description: |
+              {{ doc('order_id_pk') }}
+              Assumption: Unique and not null.
+            tests:
+              - not_null
+              - unique
+          - name: customer_id
+            description: |
+              {{ doc('customer_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: order_status
+            description: |
+              {{ doc('order_status') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: order_purchase_timestamp
+            description: |
+              {{ doc('order_purchase_timestamp') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: order_approved_at
+            description: "{{ doc('order_approved_at') }}"
+          - name: order_delivered_carrier_date
+            description: "{{ doc('order_delivered_carrier_date') }}"
+          - name: order_delivered_customer_date
+            description: "{{ doc('order_delivered_customer_date') }}"
+          - name: order_estimated_delivery_date
+            description: |
+              {{ doc('order_estimated_delivery_date') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: order_items
+        description: |
+          Line-level data for each item within an order, including references to product and seller, pricing, and shipping details.
+          **Assumptions:**
+            - order_id and order_item_id are not null.
+            - product_id and seller_id are not null.
+            - price and freight_value are not null.
+            - shipping_limit_date is present for all items.
+        columns:
+          - name: order_id
+            description: |
+              {{ doc('order_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: order_item_id
+            description: |
+              {{ doc('order_item_id') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: product_id
+            description: |
+              {{ doc('product_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: seller_id
+            description: |
+              {{ doc('seller_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: shipping_limit_date
+            description: |
+              {{ doc('shipping_limit_date') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: price
+            description: |
+              {{ doc('price') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: freight_value
+            description: |
+              {{ doc('freight_value') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: products
+        description: |
+          Product catalog including product metadata such as category, size, and weight.
+          **Assumptions:**
+            - product_id is unique and not null.
+            - All numeric columns (e.g., product_weight_g, product_length_cm) are non-negative.
+        columns:
+          - name: product_id
+            description: |
+              {{ doc('product_id_pk') }}
+              Assumption: Unique and not null.
+            tests:
+              - not_null
+              - unique
+          - name: product_category_name
+            description: "{{ doc('product_category_name') }}"
+          - name: product_name_lenght
+            description: |
+              {{ doc('product_name_length') }}
+              Assumption: Non-negative.
+          - name: product_description_lenght
+            description: |
+              {{ doc('product_description_length') }}
+              Assumption: Non-negative.
+          - name: product_photos_qty
+            description: |
+              {{ doc('product_photos_qty') }}
+              Assumption: Non-negative.
+          - name: product_weight_g
+            description: |
+              {{ doc('product_weight_g') }}
+              Assumption: Non-negative.
+          - name: product_length_cm
+            description: |
+              {{ doc('product_length_cm') }}
+              Assumption: Non-negative.
+          - name: product_height_cm
+            description: |
+              {{ doc('product_height_cm') }}
+              Assumption: Non-negative.
+          - name: product_width_cm
+            description: |
+              {{ doc('product_width_cm') }}
+              Assumption: Non-negative.
+
+      - name: sellers
+        description: |
+          Seller-level data including location and identification.
+          **Assumptions:**
+            - seller_id is unique and not null.
+            - seller_zip_code_prefix, seller_city, and seller_state are present for all sellers.
+        columns:
+          - name: seller_id
+            description: |
+              {{ doc('seller_id_pk') }}
+              Assumption: Unique and not null.
+            tests:
+              - not_null
+              - unique
+          - name: seller_zip_code_prefix
+            description: |
+              {{ doc('seller_zip_code_prefix') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: seller_city
+            description: |
+              {{ doc('seller_city') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: seller_state
+            description: |
+              {{ doc('seller_state') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: geolocation
+        description: |
+          ZIP code-level geolocation data including latitude and longitude.
+          **Assumptions:**
+            - geolocation_zip_code_prefix is present for all records.
+            - Latitude and longitude are present for all zip codes.
+        columns:
+          - name: geolocation_zip_code_prefix
+            description: |
+              {{ doc('geolocation_zip_code_prefix') }}
+              Assumption: Not null.
+          - name: geolocation_lat
+            description: |
+              {{ doc('geolocation_lat') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: geolocation_lng
+            description: |
+              {{ doc('geolocation_lng') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: geolocation_city
+            description: |
+              {{ doc('geolocation_city') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: geolocation_state
+            description: |
+              {{ doc('geolocation_state') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: order_payments
+        description: |
+          Order-level payment data including method of payment, number of installments, and total value paid.
+          **Assumptions:**
+            - order_id, payment_sequential, payment_type, and payment_value are not null.
+        columns:
+          - name: order_id
+            description: |
+              {{ doc('order_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: payment_sequential
+            description: |
+              {{ doc('payment_sequential') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: payment_type
+            description: |
+              {{ doc('payment_type') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: payment_installments
+            description: "{{ doc('payment_installments') }}"
+          - name: payment_value
+            description: |
+              {{ doc('payment_value') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+
+      - name: order_reviews
+        description: |
+          Customer review data capturing satisfaction ratings, optional comments, and review timestamps tied to completed orders.
+          **Assumptions:**
+            - review_id and order_id are not null.
+            - review_score is not null.
+            - review_creation_date is present for all reviews.
+        columns:
+          - name: review_id
+            description: |
+              {{ doc('review_id') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: order_id
+            description: |
+              {{ doc('order_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: review_score
+            description: |
+              {{ doc('review_score') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: review_comment_title
+            description: "{{ doc('review_comment_title') }}"
+          - name: review_comment_message
+            description: "{{ doc('review_comment_message') }}"
+          - name: review_creation_date
+            description: |
+              {{ doc('review_creation_date') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: review_answer_timestamp
+            description: "{{ doc('review_answer_timestamp') }}"
+
+      - name: closed_deals
+        description: |
+          Historical record of marketing leads that successfully converted into closed deals, including lead characteristics and sales details.
+          **Assumptions:**
+            - mql_id and seller_id are not null.
+            - won_date is present for all deals.
+        columns:
+          - name: mql_id
+            description: |
+              {{ doc('mql_id') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: seller_id
+            description: |
+              {{ doc('seller_id_fk') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: won_date
+            description: |
+              {{ doc('won_date') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: business_segment
+            description: "{{ doc('business_segment') }}"
+          - name: lead_type
+            description: "{{ doc('lead_type') }}"
+          - name: lead_behaviour_profile
+            description: "{{ doc('lead_behaviour_profile') }}"
+          - name: has_company
+            description: "{{ doc('has_company') }}"
+          - name: has_gtin
+            description: "{{ doc('has_gtin') }}"
+          - name: average_stock
+            description: "{{ doc('average_stock') }}"
+          - name: business_type
+            description: "{{ doc('business_type') }}"
+
+      - name: marketing_qualified_leads
+        description: |
+          Marketing leads that have been qualified for sales outreach, including lead characteristics and qualification status.
+          **Assumptions:**
+            - mql_id is not null.
+            - first_contact_date is present for all leads.
+        columns:
+          - name: mql_id
+            description: |
+              {{ doc('mql_id') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: first_contact_date
+            description: |
+              {{ doc('first_contact_date') }}
+              Assumption: Not null.
+            tests:
+              - not_null
+          - name: origin
+            description: "{{ doc('origin') }}"
+          - name: seller_id
+            description: "{{ doc('seller_id_fk') }}"
