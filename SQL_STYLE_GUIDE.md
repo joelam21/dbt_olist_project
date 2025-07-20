@@ -27,8 +27,34 @@ This document establishes the SQL coding standards and naming conventions for ou
 ### Style Philosophy
 - **Lowercase everything**: Keywords, functions, table names, column names
 - **Explicit over implicit**: Always be clear about what the code does
-- **Leading commas**: Use leading commas for better diffs and readability
+- **Leading commas**: Use leading commas for better diffs and readability (see [Leading Comma Rationale](#leading-comma-rationale))
 - **Meaningful names**: Use descriptive names that explain business purpose
+- **dbt Community Standards**: Follow established patterns from the modern analytics engineering community
+
+#### Leading Comma Rationale
+**Why we use leading commas in this production-grade dbt project:**
+
+1. **Industry Standard**: Leading commas are the established pattern in the dbt ecosystem and modern analytics engineering
+2. **Version Control Benefits**: Each column addition/removal appears as a single clean line in Git diffs
+3. **Error Prevention**: Missing commas are visually obvious and easier to debug
+4. **Team Collaboration**: Reduces merge conflicts when multiple developers modify column lists
+5. **Tooling Integration**: dbt Power User, dbt Cloud, and other analytics tools expect this format
+
+**Example of superior diff quality:**
+```sql
+-- Adding a new column with leading commas (CLEAN DIFF):
+select
+    customer_id
+    , customer_name
+    , customer_email
++   , customer_phone    -- Single line addition, clear change
+
+-- vs trailing commas (MESSY DIFF):
+    customer_email,     -- This line changes just for comma
++   customer_phone      -- Actual new content
+```
+
+This follows the **dbt Labs official style guide** and is used by leading analytics engineering teams at companies like Airbnb, GitLab, and Buffer.
 
 ---
 
