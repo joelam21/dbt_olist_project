@@ -1,0 +1,60 @@
+version: 2
+
+seeds:
+  - name: category_translation
+    description: "Mapping of original product category names (in Portuguese) to their English translations. Used to enrich product data with user-friendly category names."
+    columns:
+      - name: product_category_name
+        description: "{{ doc('product_category_name') }}"
+        tests:
+          - not_null
+          - unique
+      - name: product_category_name_english
+        description: "{{ doc('product_category_name_english') }}"
+        tests:
+          - not_null
+
+  - name: categories
+    description: "User-defined mapping table that groups product subcategory names (translated to English) into broader business categories. Created as a seed to support high-level reporting and category rollups."
+    columns:
+      - name: category
+        description: "{{ doc('category') }}"
+        tests:
+          - not_null
+      - name: subcategory
+        description: "{{ doc('subcategory') }}"
+        tests:
+          - not_null
+          - unique
+
+  - name: origin_channel_map
+    description: "Mapping of marketing lead origins to their associated channels for attribution and reporting."
+    columns:
+      - name: origin
+        description: "{{ doc('origin') }}"
+        tests:
+          - unique
+      - name: channel
+        description: "{{ doc('channel') }}"
+        tests:
+          - not_null
+
+  - name: sla_thresholds
+    description: "Defines SLA thresholds for each SLA type, with effective date ranges for slowly changing dimension support. Used to join orders to the correct SLA based on order date."
+    columns:
+      - name: sla_type
+        description: "The type of SLA (e.g., approve, carrier)."
+        tests:
+          - not_null
+      - name: threshold_days
+        description: "The number of days allowed for this SLA type."
+        tests:
+          - not_null
+      - name: effective_start_date
+        description: "The date when this SLA threshold became effective."
+        tests:
+          - not_null
+      - name: effective_end_date
+        description: "The date when this SLA threshold was superseded or expires."
+        tests:
+          - not_null

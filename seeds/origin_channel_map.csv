@@ -1,0 +1,12 @@
+ORIGIN,CHANNEL
+direct_traffic,Direct
+display,Paid
+email,Email
+organic_search,Organic
+other,Other
+other_publicities,Paid
+paid_search,Paid
+referral,Referral
+social,Social
+unknown,Unknown
+null,Unknown

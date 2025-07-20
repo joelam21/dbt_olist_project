@@ -1,0 +1,137 @@
+version: 2
+
+models:
+  - name: stg_ecommerce_orders
+    description: |
+      Staging model for Olist e-commerce orders with standardized fields and business logic.
+
+      **Business Purpose**: This model cleans and standardizes the raw order data,
+      adding business-friendly field names and derived metrics that are commonly
+      used across the organization.
+
+      **Data Scope**: All orders from the Olist platform since 2016. Includes
+      orders in all statuses from creation through delivery.
+
+      **Key Transformations**:
+      - Standardizes timestamp field naming (`*_at` pattern)
+      - Adds date dimension fields for easier time-based analysis
+      - Calculates delivery performance metrics
+      - Creates business-friendly status categorization
+      - Adds data quality flags for monitoring
+
+      **Update Frequency**: Daily refresh as a view (low computational cost)
+
+      **Downstream Usage**:
+      - Input for fact and dimension models in marts layer
+      - Used by analytics dashboards for order trend analysis
+      - Foundation for customer segmentation and seller performance models
+
+    meta:
+      owner: "data-team@olist.com"
+      maturity: "high"
+      update_frequency: "daily"
+      business_domain: "ecommerce"
+
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "{{ doc('customer_order_id') }}"
+        tests:
+          - not_null
+
+      - name: order_status
+        description: |
+          Current status of the order in the fulfillment workflow.
+          Raw values from source system: 'delivered', 'shipped', 'processing',
+          'cancelled', 'created', 'approved', 'invoiced', 'unavailable'
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['delivered', 'shipped', 'processing', 'cancelled', 'created', 'approved', 'invoiced', 'unavailable']
+
+      - name: order_status_category
+        description: "{{ doc('order_status_category') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['completed', 'in_progress', 'cancelled', 'created']
+
+      - name: is_order_completed
+        description: "{{ doc('is_order_completed') }}"
+        tests:
+          - not_null
+
+      - name: order_created_at
+        description: "{{ doc('order_created_at') }}"
+        tests:
+          - not_null
+
+      - name: order_approved_at
+        description: "{{ doc('order_approved_at') }}"
+
+      - name: order_shipped_at
+        description: "{{ doc('order_shipped_at') }}"
+
+      - name: order_delivered_at
+        description: "{{ doc('order_delivered_customer_date') }}"
+
+      - name: order_estimated_delivery_date
+        description: "{{ doc('order_estimated_delivery_date') }}"
+
+      - name: order_date
+        description: "{{ doc('order_date') }}"
+        tests:
+          - not_null
+
+      - name: order_year
+        description: "{{ doc('order_year') }}"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 2016
+              max_value: 2025
+
+      - name: order_month
+        description: "{{ doc('order_month') }}"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 12
+
+      - name: order_day
+        description: "{{ doc('order_day') }}"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 31
+
+      - name: order_day_of_week
+        description: "{{ doc('order_day_of_week') }}"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 7
+
+      - name: delivery_delay_days
+        description: "{{ doc('delivery_delay_days') }}"
+
+      - name: total_delivery_days
+        description: "{{ doc('total_delivery_days') }}"
+
+      - name: has_missing_ship_date
+        description: "{{ doc('has_missing_ship_date') }}"
+        tests:
+          - not_null
+
+      - name: is_severely_delayed
+        description: "{{ doc('is_severely_delayed') }}"
+        tests:
+          - not_null

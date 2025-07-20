@@ -1,0 +1,5 @@
+sla_type,threshold_days,effective_start_date,effective_end_date
+approve,2,2016-01-01,2016-03-31
+approve,1,2016-04-01,9999-12-31
+carrier,4,2016-01-01,2016-03-31
+carrier,3,2016-04-01,9999-12-31
