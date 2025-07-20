@@ -11,4 +11,9 @@ macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
 models:
-  +materialized: view
+  staging:
+    +materialized: view
+  intermediate:
+    +materialized: table
+  marts:
+    +materialized: view
