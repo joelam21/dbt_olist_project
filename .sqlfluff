@@ -5,15 +5,24 @@
 [sqlfluff]
 # Snowflake dialect for our dbt project
 dialect = snowflake
-templater = jinja
+templater = dbt
+exclude_rules = LT02
+
+[templater dbt]
+project_dir = .
+profiles_dir = ~/.dbt
+profile = dbt_olist_project
+target = dev
+dbt_skip_compilation_error = True
+
 
 # SQL formatting preferences (updated config format)
 max_line_length = 100
 large_file_skip_byte_limit = 40000
 
 # Template configuration for Jinja (fallback without dbt credentials)
-[sqlfluff:templater:jinja]
-apply_dbt_builtins = true
+# [sqlfluff:templater:jinja]
+# apply_dbt_builtins = true
 
 # Indentation configuration
 [sqlfluff:indentation]

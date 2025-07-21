@@ -1,0 +1,373 @@
+version: 2
+
+models:
+  - name: stg_category_enriched
+    description: |
+      Enriched category staging model joining category translations and categories seeds.
+      No base models are used as the seeds are already clean.
+      **Assumptions:**
+        - Each category and subcategory combination is unique.
+        - All product_category_name values exist in the categories seed.
+        - Translations are present for most categories, but some may be missing.
+    columns:
+      - name: category
+        description: Top-level category name.
+      - name: subcategory
+        description: English subcategory name from category_translation.
+      - name: product_category_name
+        description: Original product category name.
+      - name: is_translated
+        description: True if a translation exists for the subcategory.
+
+  - name: stg_customers
+    description: |
+      Customer-level data including unique customer IDs, ZIP codes, and city-level location information.
+      **Assumptions:**
+        - customer_id is unique and not null.
+        - customer_unique_id is not null.
+        - ZIP codes are present for all customers.
+    columns:
+      - name: customer_id
+        description: |
+          {{ doc('customer_id_pk') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: customer_unique_id
+        description: |
+          {{ doc('customer_unique_id') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: zip_code
+        description: |
+          {{ doc('customer_zip_code_prefix') }}
+      - name: customer_city
+        description: "{{ doc('customer_city') }}"
+      - name: customer_state
+        description: "{{ doc('customer_state') }}"
+  - name: stg_geolocation
+    description: |
+      ZIP code-level geolocation data including latitude and longitude.
+      **Assumptions:**
+        - Each zip_code is unique.
+        - Latitude and longitude are present for all zip codes.
+    columns:
+      - name: zip_code
+        description: "{{ doc('geolocation_zip_code_prefix') }}"
+      - name: lat
+        description: "{{ doc('geolocation_lat') }}"
+      - name: lng
+        description: "{{ doc('geolocation_lng') }}"
+      - name: city
+        description: "{{ doc('geolocation_city') }}"
+      - name: state
+        description: "{{ doc('geolocation_state') }}"
+
+  - name: stg_order_items
+    description: |
+      Line-level data for each item within an order, including references to product and seller, pricing, and shipping details.
+      **Assumptions:**
+        - order_item_key is unique and not null.
+        - price and freight_value are non-negative.
+        - All referenced product_id and seller_id values exist in their respective dimension tables.
+    columns:
+      - name: order_item_key
+        description: |
+          {{ doc('order_item_key') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: order_item_id
+        description: |
+          {{ doc('order_item_id') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: product_id
+        description: "{{ doc('product_id_fk') }}"
+      - name: seller_id
+        description: "{{ doc('seller_id_fk') }}"
+      - name: shipping_limit_date
+        description: "{{ doc('shipping_limit_date') }}"
+      - name: price
+        description: |
+          {{ doc('price') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+
+      - name: freight_value
+        description: |
+          {{ doc('freight_value') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+
+  - name: stg_order_payments
+    description: |
+      Order-level payment data including method of payment, number of installments, and total value paid.
+      **Assumptions:**
+        - order_payment_key is unique and not null.
+        - payment_value and payment_installments are non-negative.
+        - payment_type is always present.
+    columns:
+      - name: order_payment_key
+        description: |
+          {{ doc('order_payment_key') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: |
+          {{ doc('order_id_fk') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: payment_sequential
+        description: |
+          {{ doc('payment_sequential') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: payment_type
+        description: "{{ doc('payment_type') }}"
+      - name: payment_installments
+        description: |
+          {{ doc('payment_installments') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: payment_value
+        description: |
+          {{ doc('payment_value') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+
+  - name: stg_order_reviews
+    description: |
+      Customer review data capturing satisfaction ratings, optional comments, and review timestamps tied to completed orders.
+      **Assumptions:**
+        - review_key is unique and not null.
+        - review_id and order_id are not null.
+        - review_score is between 1 and 5.
+    columns:
+      - name: review_key
+        description: |
+          {{ doc('review_key') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: review_id
+        description: |
+          {{ doc('review_id') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: order_id
+        description: |
+          {{ doc('order_id_fk') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: review_score
+        description: |
+          {{ doc('review_score') }}
+          Assumption: Value between 1 and 5.
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+      - name: review_comment_title
+        description: "{{ doc('review_comment_title') }}"
+      - name: review_comment_message
+        description: "{{ doc('review_comment_message') }}"
+      - name: review_creation_date
+        description: "{{ doc('review_creation_date') }}"
+      - name: review_answer_timestamp
+        description: "{{ doc('review_answer_timestamp') }}"
+
+  - name: stg_orders
+    description: |
+      Order-level data including customer reference, order status, and multiple timestamps capturing the order lifecycle.
+      **Assumptions:**
+        - order_id is unique and not null.
+        - customer_id is not null.
+        - order_status is always present and valid.
+    columns:
+      - name: order_id
+        description: |
+          {{ doc('order_id_pk') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: |
+          {{ doc('customer_id_fk') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: order_status
+        description: |
+          {{ doc('order_status') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "{{ doc('order_purchase_timestamp') }}"
+      - name: order_approved_at
+        description: "{{ doc('order_approved_at') }}"
+      - name: order_delivered_carrier_date
+        description: "{{ doc('order_delivered_carrier_date') }}"
+      - name: order_delivered_customer_date
+        description: "{{ doc('order_delivered_customer_date') }}"
+      - name: order_estimated_delivery_date
+        description: "{{ doc('order_estimated_delivery_date') }}"
+
+  - name: stg_products
+    description: |
+      Product catalog including product metadata such as category, size, and weight.
+      **Assumptions:**
+        - product_id is unique and not null.
+        - Numeric columns (e.g., weight_g, length_cm) are non-negative.
+    columns:
+      - name: product_id
+        description: |
+          {{ doc('product_id_pk') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: category_name
+        description: "{{ doc('product_category_name') }}"
+      - name: name_length
+        description: |
+          {{ doc('product_name_length') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: description_length
+        description: |
+          {{ doc('product_description_length') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: photos_qty
+        description: |
+          {{ doc('product_photos_qty') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: weight_g
+        description: |
+          {{ doc('product_weight_g') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: length_cm
+        description: |
+          {{ doc('product_length_cm') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: height_cm
+        description: |
+          {{ doc('product_height_cm') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+      - name: width_cm
+        description: |
+          {{ doc('product_width_cm') }}
+          Assumption: Non-negative.
+        tests:
+          - is_non_negative
+
+  - name: stg_sellers
+    description: |
+      Seller-level data including location and identification.
+      **Assumptions:**
+        - seller_id is unique and not null.
+        - seller_zip_code_prefix is present for all sellers.
+    columns:
+      - name: seller_id
+        description: |
+          {{ doc('seller_id_pk') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: seller_zip_code_prefix
+        description: "{{ doc('seller_zip_code_prefix') }}"
+      - name: seller_city
+        description: "{{ doc('seller_city') }}"
+      - name: seller_state
+        description: "{{ doc('seller_state') }}"
+
+  - name: stg_closed_deals
+    description: |
+      Staging model for closed deals, including lead, seller, and sales attributes.
+      **Assumptions:**
+        - mql_id is not null.
+        - seller_id is present for all deals.
+    columns:
+      - name: mql_id
+        description: |
+          {{ doc('mql_id') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: seller_id
+        description: "{{ doc('seller_id_fk') }}"
+      - name: sdr_id
+        description: "{{ doc('sdr_id') }}"
+      - name: sr_id
+        description: "{{ doc('sr_id') }}"
+      - name: won_date
+        description: "{{ doc('won_date') }}"
+      - name: business_segment
+        description: "{{ doc('business_segment') }}"
+      - name: lead_type
+        description: "{{ doc('lead_type') }}"
+      - name: lead_behaviour_profile
+        description: "{{ doc('lead_behaviour_profile') }}"
+      - name: has_company
+        description: "{{ doc('has_company') }}"
+      - name: has_gtin
+        description: "{{ doc('has_gtin') }}"
+      - name: average_stock
+        description: "{{ doc('average_stock') }}"
+      - name: business_type
+        description: "{{ doc('business_type') }}"
+      - name: declared_product_catalog_size
+        description: "{{ doc('declared_product_catalog_size') }}"
+      - name: declared_monthly_revenue
+        description: "{{ doc('declared_monthly_revenue') }}"
+
+  - name: stg_marketing_qualified_leads
+    description: |
+      Staging model for marketing qualified leads (MQLs), including first contact date, landing page, and origin.
+      **Assumptions:**
+        - mql_id is unique and not null.
+        - first_contact_date is present for all leads.
+    columns:
+      - name: mql_id
+        description: |
+          {{ doc('mql_id') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: first_contact_date
+        description: |
+          {{ doc('first_contact_date') }}
+          Assumption: Not null.
+      - name: landing_page_id
+        description: "{{ doc('landing_page_id') }}"
+      - name: origin
+        description: "{{ doc('origin') }}"

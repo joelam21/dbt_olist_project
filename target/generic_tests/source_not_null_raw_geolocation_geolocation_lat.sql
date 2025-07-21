@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="geolocation_lat", model=get_where_subquery(source('raw', 'geolocation'))) }}

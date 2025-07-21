@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="order_estimated_delivery_date", model=get_where_subquery(source('raw', 'orders'))) }}

@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="won_date", model=get_where_subquery(source('raw', 'closed_deals'))) }}

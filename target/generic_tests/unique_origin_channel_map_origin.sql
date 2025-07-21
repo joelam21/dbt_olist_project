@@ -1,0 +1,1 @@
+{{ test_unique(column_name="origin", model=get_where_subquery(ref('origin_channel_map'))) }}

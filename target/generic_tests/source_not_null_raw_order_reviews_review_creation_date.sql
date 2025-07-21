@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="review_creation_date", model=get_where_subquery(source('raw', 'order_reviews'))) }}

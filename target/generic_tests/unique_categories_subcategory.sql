@@ -1,0 +1,1 @@
+{{ test_unique(column_name="subcategory", model=get_where_subquery(ref('categories'))) }}

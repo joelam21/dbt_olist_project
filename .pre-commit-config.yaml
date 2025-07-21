@@ -32,14 +32,30 @@ repos:
     rev: 3.4.2
     hooks:
       - id: sqlfluff-lint
-        description: Lint SQL files for style and syntax issues
-        args: ['--dialect=snowflake']
-        additional_dependencies: ['sqlfluff-templater-dbt']
+        args:
+          - '--dialect=snowflake'
+          - '--exclude-rules=LT02'
+          - '--ignore'
+          - 'TMP'
+          - '--rules=layout.long_lines:max_line_length=120'
+        additional_dependencies: [
+          'sqlfluff-templater-dbt',
+          'dbt-core~=1.10.4',
+          'dbt-snowflake~=1.10.0'
+        ]
         files: \.sql$
       - id: sqlfluff-fix
-        description: Auto-fix SQL formatting issues
-        args: ['--dialect=snowflake']
-        additional_dependencies: ['sqlfluff-templater-dbt']
+        args:
+          - '--dialect=snowflake'
+          - '--exclude-rules=LT02,ST06,LT05'
+          - '--ignore'
+          - 'TMP'
+          - '--rules=layout.long_lines:max_line_length=120'
+        additional_dependencies: [
+          'sqlfluff-templater-dbt',
+          'dbt-core~=1.10.4',
+          'dbt-snowflake~=1.10.0'
+        ]
         files: \.sql$
 
   # Python code quality (for any Python scripts)

@@ -1,0 +1,1 @@
+{{ test_is_non_negative(column_name="photos_qty", model=get_where_subquery(ref('stg_products'))) }}

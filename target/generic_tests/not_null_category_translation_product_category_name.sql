@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="product_category_name", model=get_where_subquery(ref('category_translation'))) }}

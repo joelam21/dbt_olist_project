@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="shipping_limit_date", model=get_where_subquery(source('raw', 'order_items'))) }}

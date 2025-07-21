@@ -1,0 +1,1 @@
+{{ test_is_non_negative(column_name="freight_value", model=get_where_subquery(ref('stg_order_items'))) }}

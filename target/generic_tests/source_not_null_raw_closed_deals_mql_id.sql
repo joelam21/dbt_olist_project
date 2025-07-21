@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="mql_id", model=get_where_subquery(source('raw', 'closed_deals'))) }}

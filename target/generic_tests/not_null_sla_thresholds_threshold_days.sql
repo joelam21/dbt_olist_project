@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="threshold_days", model=get_where_subquery(ref('sla_thresholds'))) }}

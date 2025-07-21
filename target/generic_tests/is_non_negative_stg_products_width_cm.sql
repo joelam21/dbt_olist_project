@@ -1,0 +1,1 @@
+{{ test_is_non_negative(column_name="width_cm", model=get_where_subquery(ref('stg_products'))) }}
