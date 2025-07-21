@@ -50,7 +50,6 @@ repos:
           - '--exclude-rules=LT02,ST06,LT05'
           - '--ignore'
           - 'TMP'
-          - '--rules=layout.long_lines:max_line_length=120'
         additional_dependencies: [
           'sqlfluff-templater-dbt',
           'dbt-core~=1.10.4',

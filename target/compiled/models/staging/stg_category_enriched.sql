@@ -11,8 +11,14 @@ select
     categories.category
     , category_translation.product_category_name_english as subcategory
     , category_translation.product_category_name
-    , iff(category_translation.product_category_name_english is not null, true, false)
+    , iff(
+        category_translation.product_category_name_english is not null
+        , true
+        , false
+    )
         as is_translated
 from dbt_olist_project.DBT_DEV.category_translation as category_translation
 left join dbt_olist_project.DBT_DEV.categories as categories
-    on category_translation.product_category_name_english = categories.subcategory
+    on
+        category_translation.product_category_name_english
+        = categories.subcategory

@@ -2,7 +2,9 @@
 -- materialization is configured at the directory or project level
 -- (see dbt_project.yml under `models:` or `models.staging:`)
 -- remove or override this at the model level only if needed
--- Purpose: Stages order payments data from the raw layer, generating a surrogate key for uniqueness and preparing for downstream modeling.
+-- Purpose: Stages order payments data from the raw layer,
+--          generating a surrogate key for uniqueness and
+--          preparing for downstream modeling.
 -- Note: Uses the generate_surrogate_key macro to ensure unique order payment keys.
 -- Primary key: order_payment_key (generated from order_id, payment_sequential)
 
