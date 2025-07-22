@@ -1,0 +1,555 @@
+version: 2
+
+models:
+  - name: int_order_items
+    description: |
+      This intermediate model enriches order items with product, seller, category, and order attributes in a single step.
+      All enrichment logic is kept here for simplicity and because it is only used in this context.
+      If reuse or complexity increases, consider modularizing into separate intermediate models for maintainability.
+      **Assumptions:**
+        - Each order_item_key is unique and not null.
+        - All referenced product_id and seller_id values exist in their respective dimension tables.
+        - Null order_status values are treated as 'no_status'.
+        - Numeric columns (e.g., price, freight_value) are always non-negative.
+        - Only valid order_status values are present (see accepted_values test).
+    columns:
+      - name: order_item_key
+        description: |
+          {{ doc('order_item_key') }}
+          Assumption: Unique and not null for every row.
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: |
+          {{ doc('order_id_fk') }}
+          Assumption: Not null; must exist in the orders table.
+        tests:
+          - not_null
+      - name: order_item_id
+        description: "{{ doc('order_item_id') }}"
+        tests:
+          - not_null
+      - name: product_id
+        description: |
+          {{ doc('product_id_fk') }}
+          Assumption: Not null; must exist in the products table.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: order_purchase_timestamp
+        description: |
+          {{ doc('order_purchase_timestamp') }}
+      - name: shipping_limit_date
+        description: "{{ doc('shipping_limit_date') }}"
+      - name: price
+        description: |
+          {{ doc('price') }}
+          Assumption: Non-negative value.
+        tests:
+          - is_non_negative
+      - name: freight_value
+        description: |
+          {{ doc('freight_value') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: item_total_value
+        description: |
+          {{ doc('item_total_value') }}
+          Assumption: Non-negative value.
+        tests:
+          - is_non_negative
+      - name: order_status
+        description: |
+          {{ doc('order_status') }}
+          Assumption: Only the listed statuses are valid; nulls are replaced with 'no_status'.
+        tests:
+          - accepted_values:
+              values:
+                - delivered
+                - shipped
+                - canceled
+                - invoiced
+                - processing
+                - unavailable
+                - created
+                - approved
+                - no_status
+      - name: customer_id
+        description: "{{ doc('customer_id_fk') }}"
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_order_id   # or the correct PK in your dim_customers
+
+  - name: int_order_payments
+    description: |
+      Intermediate model for order payments.
+      **Assumptions:**
+        - Each order_id exists in the orders table.
+        - Payment values and installments are non-negative.
+        - payment_type is always present.
+    columns:
+      - name: order_payment_key
+        description: "{{ doc('order_payment_key') }}"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        description: "{{ doc('order_id_fk') }}"
+        tests:
+          - not_null
+      - name: payment_type
+        description: |
+          {{ doc('payment_type') }}
+          Assumption: Not null; only valid payment types are present.
+        tests:
+          - not_null
+      - name: payment_value
+        description: |
+          {{ doc('payment_value') }}
+        tests:
+          - is_non_negative
+      - name: payment_installments
+        description: |
+          {{ doc('payment_installments') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: payment_sequential
+        description: |
+          {{ doc('payment_sequential') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: payment_number
+        description: |
+          {{ doc('payment_number') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: total_installments
+        description: |
+          {{ doc('total_installments') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: cumulative_payment
+        description: |
+          {{ doc('cumulative_payment') }}
+        tests:
+          - is_non_negative
+      - name: order_total
+        description: |
+          {{ doc('order_total') }}
+          Assumption: Non-negative value.
+        tests:
+          - is_non_negative
+      - name: remaining_balance
+        description: "{{ doc('remaining_balance') }}"
+        tests:
+          - not_null
+      - name: is_final_payment
+        description: |
+          {{ doc('is_final_payment') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: is_overpaid_order
+        description: |
+          {{ doc('is_overpaid_order') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: payment_progress_pct
+        description: |
+          {{ doc('payment_progress_pct') }}
+          Assumption: Non-negative value.
+        tests:
+          - is_non_negative
+      - name: payment_status
+        description: "{{ doc('payment_status') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'orphaned_payments'
+                - 'unpaid'
+                - 'overpaid'
+                - 'paid'
+                - 'partial'
+                - 'unknown'
+
+  - name: int_orders_fulfillment_metrics
+    description: |
+      Intermediate model to calculate order fulfillment metrics for delivered orders.
+      **Assumptions:**
+        - Only orders with order_status = 'delivered' are included.
+        - All date columns are in UTC.
+        - All referenced customer_id values exist in the customers table.
+        - delivery_days and related metrics are calculated only for delivered orders.
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "{{ doc('customer_id_fk') }}"
+        tests:
+          - not_null
+      - name: order_status
+        description: |
+          {{ doc('order_status') }}
+          Assumption: Only 'delivered' is valid in this model.
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - delivered
+                - shipped
+                - canceled
+                - invoiced
+                - processing
+                - unavailable
+                - created
+                - approved
+                - no_status
+      - name: order_purchase_timestamp
+        description: "{{ doc('order_purchase_timestamp') }}"
+        tests:
+          - not_null
+      - name: order_approved_at
+        description: "{{ doc('order_approved_at') }}"
+      - name: order_delivered_carrier_date
+        description: "{{ doc('order_delivered_carrier_date') }}"
+      - name: order_delivered_customer_date
+        description: "{{ doc('order_delivered_customer_date') }}"
+      - name: order_estimated_delivery_date
+        description: "{{ doc('order_estimated_delivery_date') }}"
+        tests:
+          - not_null
+      - name: delivery_window_days
+        description: |
+          {{ doc('order_delivery_window_days') }}
+          Assumption: Non-negative value.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: delivery_days
+        description: "{{ doc('order_delivery_days') }}"
+      - name: days_to_approve
+        description: "{{ doc('order_days_to_approve') }}"
+      - name: days_to_carrier
+        description: "{{ doc('order_days_to_carrier') }}"
+      - name: days_to_customer
+        description: "{{ doc('order_days_to_customer') }}"
+      - name: delivered_on_time
+        description: |
+          {{ doc('order_delivered_on_time') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - accepted_values:
+              values: [true, false]
+
+  - name: int_orders_fulfillment_benchmarks
+    description: |
+      Order fulfillment metrics with calculated SLA thresholds and breach flags.
+      **Assumptions:**
+        - Each order_id is unique and not null.
+        - SLA columns are non-negative.
+        - Breach flags are always true or false.
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: delivered_on_time
+        description: |
+          {{ doc('order_delivered_on_time') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - accepted_values:
+              values: [true, false]
+      - name: days_to_approve
+        description: "{{ doc('order_days_to_approve') }}"
+      - name: days_to_carrier
+        description: "{{ doc('order_days_to_carrier') }}"
+      - name: days_to_customer
+        description: "{{ doc('order_days_to_customer') }}"
+      - name: delivery_window_days
+        description: |
+          {{ doc('order_delivery_window_days') }}
+          Assumption: Non-negative value.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: sla_days_to_approve
+        description: |
+          {{ doc('sla_days_to_approve') }}
+          Assumption: Non-negative value.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: sla_days_to_carrier
+        description: |
+          {{ doc('sla_days_to_carrier') }}
+          Assumption: Non-negative value.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: sla_days_to_last_mile
+        description: "{{ doc('sla_days_to_last_mile') }}"
+      - name: approval_sla_breached
+        description: |
+          {{ doc('approval_sla_breached') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: carrier_sla_breached
+        description: |
+          {{ doc('carrier_sla_breached') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: last_mile_sla_breached
+        description: |
+          {{ doc('last_mile_sla_breached') }}
+          Assumption: Not null; only true/false values.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: fulfillment_delay_summary
+        description: "{{ doc('fulfillment_delay_summary') }}"
+        tests:
+          - not_null
+
+  - name: int_orders_metrics
+    description: |
+      Aggregated order-level metrics including item count, total price, freight, and order value.
+      **Assumptions:**
+        - Each order_id is unique and not null.
+        - All totals are non-negative.
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: num_items
+        description: |
+          The number of items in the order.
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+      - name: order_total
+        description: |
+          {{ doc('order_total') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: price_total
+        description: |
+          {{ doc('price_total') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+      - name: freight_total
+        description: |
+          {{ doc('freight_total') }}
+          Assumption: Not null and non-negative.
+        tests:
+          - not_null
+          - is_non_negative
+
+  - name: int_marketing_qualified_leads
+    description: |
+      Intermediate model that enriches marketing qualified leads (MQLs) with their associated marketing channel and key lead attributes.
+      **Assumptions:**
+        - Each mql_id is unique and not null.
+        - All first_contact_date values are present.
+    columns:
+      - name: mql_id
+        description: |
+          {{ doc('mql_id') }}
+          Assumption: Unique and not null.
+        tests:
+          - not_null
+          - unique
+      - name: first_contact_date
+        description: |
+          {{ doc('first_contact_date') }}
+          Assumption: Not null.
+        tests:
+          - not_null
+      - name: landing_page_id
+        description: "{{ doc('landing_page_id') }}"
+      - name: origin
+        description: "{{ doc('origin') }}"
+      - name: channel
+        description: "{{ doc('channel') }}"
+
+  - name: int_orders_fulfillment
+    description: |
+      Intermediate model that combines fulfillment metrics and SLA benchmarks for each order.
+      This model is built by joining `int_orders_fulfillment_metrics` (which calculates fulfillment durations and delivery metrics)
+      with `int_orders_fulfillment_benchmarks` (which provides SLA thresholds and breach flags).
+      **Assumptions:**
+        - Each order_id is unique and not null.
+        - All referenced metrics and benchmarks are present and non-negative where applicable.
+        - Only delivered orders are included.
+    columns:
+      - name: order_id
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "{{ doc('customer_id_fk') }}"
+        tests:
+          - not_null
+      - name: order_status
+        description: "{{ doc('order_status') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - delivered
+                - shipped
+                - canceled
+                - invoiced
+                - processing
+                - unavailable
+                - created
+                - approved
+                - no_status
+      - name: order_purchase_timestamp
+        description: "{{ doc('order_purchase_timestamp') }}"
+        tests:
+          - not_null
+      - name: order_approved_at
+        description: "{{ doc('order_approved_at') }}"
+      - name: order_delivered_carrier_date
+        description: "{{ doc('order_delivered_carrier_date') }}"
+      - name: order_delivered_customer_date
+        description: "{{ doc('order_delivered_customer_date') }}"
+      - name: order_estimated_delivery_date
+        description: "{{ doc('order_estimated_delivery_date') }}"
+        tests:
+          - not_null
+      - name: delivery_window_days
+        description: "{{ doc('order_delivery_window_days') }}"
+        tests:
+          - not_null
+          - is_non_negative
+      - name: delivery_days
+        description: "{{ doc('order_delivery_days') }}"
+      - name: days_to_approve
+        description: "{{ doc('order_days_to_approve') }}"
+      - name: days_to_carrier
+        description: "{{ doc('order_days_to_carrier') }}"
+      - name: days_to_customer
+        description: "{{ doc('order_days_to_customer') }}"
+      - name: delivered_on_time
+        description: "{{ doc('order_delivered_on_time') }}"
+        tests:
+          - accepted_values:
+              values: [true, false]
+      - name: sla_days_to_approve
+        description: "{{ doc('sla_days_to_approve') }}"
+        tests:
+          - not_null
+          - is_non_negative
+      - name: sla_days_to_carrier
+        description: "{{ doc('sla_days_to_carrier') }}"
+        tests:
+          - not_null
+          - is_non_negative
+      - name: sla_days_to_last_mile
+        description: "{{ doc('sla_days_to_last_mile') }}"
+      - name: approval_sla_breached
+        description: "{{ doc('approval_sla_breached') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: carrier_sla_breached
+        description: "{{ doc('carrier_sla_breached') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: last_mile_sla_breached
+        description: "{{ doc('last_mile_sla_breached') }}"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+      - name: fulfillment_delay_summary
+        description: "{{ doc('fulfillment_delay_summary') }}"
+        tests:
+          - not_null
+
+  - name: int_zipcode_geolocation
+    description: "Aggregated geolocation data at the zip code level, providing a single representative latitude and longitude for each zip code for use in mapping and spatial analysis."
+    columns:
+      - name: zip_code
+        description: "{{ doc('geolocation_zip_code_prefix') }}"
+        tests:
+          - not_null
+          - unique
+      - name: lat
+        description: "{{ doc('geolocation_lat') }}"
+        tests:
+          - not_null
+      - name: lng
+        description: "{{ doc('geolocation_lng') }}"
+        tests:
+          - not_null
+
+  - name: int_products_enriched
+    description: "Intermediate model joining product details with enriched category information."
+    columns:
+      - name: product_id
+        description: "{{ doc('product_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: category_name
+        description: "{{ doc('product_category_name') }}"
+      - name: category
+        description: "{{ doc('category') }}"
+      - name: subcategory
+        description: "{{ doc('subcategory') }}"
+      - name: name_length
+        description: "{{ doc('product_name_length') }}"
+      - name: description_length
+        description: "{{ doc('product_description_length') }}"
+      - name: photos_qty
+        description: "{{ doc('product_photos_qty') }}"
+      - name: weight_g
+        description: "{{ doc('product_weight_g') }}"
+      - name: length_cm
+        description: "{{ doc('product_length_cm') }}"
+      - name: height_cm
+        description: "{{ doc('product_height_cm') }}"

@@ -1,0 +1,236 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: "Fact table containing order events, fulfillment, review, and order metrics."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        data_type: string
+        description: "{{ doc('order_id_pk') }}"
+        tests:
+          - not_null
+          - unique
+      - name: customer_order_id
+        data_type: string
+        description: "{{ doc('customer_order_id') }}"
+        tests:
+          - not_null
+      - name: order_status
+        data_type: string
+        description: "{{ doc('order_status') }}"
+      - name: order_purchase_timestamp
+        data_type: timestamp
+        description: "{{ doc('order_purchase_timestamp') }}"
+      - name: order_approved_at
+        data_type: timestamp
+        description: "{{ doc('order_approved_at') }}"
+      - name: order_delivered_carrier_date
+        data_type: timestamp
+        description: "{{ doc('order_delivered_carrier_date') }}"
+      - name: order_delivered_customer_date
+        data_type: timestamp
+        description: "{{ doc('order_delivered_customer_date') }}"
+      - name: order_estimated_delivery_date
+        data_type: timestamp
+        description: "{{ doc('order_estimated_delivery_date') }}"
+      - name: days_to_approve
+        data_type: integer
+        description: "{{ doc('order_days_to_approve') }}"
+      - name: days_to_carrier
+        data_type: integer
+        description: "{{ doc('order_days_to_carrier') }}"
+      - name: days_to_customer
+        data_type: integer
+        description: "{{ doc('order_days_to_customer') }}"
+      - name: sla_days_to_approve
+        data_type: integer
+        description: "{{ doc('sla_days_to_approve') }}"
+      - name: sla_days_to_carrier
+        data_type: integer
+        description: "{{ doc('sla_days_to_carrier') }}"
+      - name: sla_days_to_last_mile
+        data_type: integer
+        description: "{{ doc('sla_days_to_last_mile') }}"
+      - name: delivery_window_days
+        data_type: integer
+        description: "{{ doc('order_delivery_window_days') }}"
+      - name: delivery_days
+        data_type: integer
+        description: "{{ doc('order_delivery_days') }}"
+      - name: delivered_on_time
+        data_type: boolean
+        description: "{{ doc('order_delivered_on_time') }}"
+      - name: approval_sla_breached
+        data_type: boolean
+        description: "{{ doc('approval_sla_breached') }}"
+      - name: carrier_sla_breached
+        data_type: boolean
+        description: "{{ doc('carrier_sla_breached') }}"
+      - name: last_mile_sla_breached
+        data_type: boolean
+        description: "{{ doc('last_mile_sla_breached') }}"
+      - name: fulfillment_delay_summary
+        data_type: string
+        description: "{{ doc('fulfillment_delay_summary') }}"
+      - name: review_score
+        data_type: integer
+        description: "{{ doc('review_score') }}"
+      - name: num_items
+        data_type: integer
+        description: "{{ doc('num_items') }}"
+      - name: price_total
+        data_type: float
+        description: "{{ doc('price_total') }}"
+      - name: freight_total
+        data_type: float
+        description: "{{ doc('freight_total') }}"
+      - name: order_total
+        data_type: float
+        description: "{{ doc('order_total') }}"
+
+  - name: fct_order_payments
+    description: "Fact table containing payment events and payment metrics for each order."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_payment_key
+        data_type: string
+        description: "{{ doc('order_payment_key') }}"
+        tests:
+          - not_null
+          - unique
+      - name: order_id
+        data_type: string
+        description: "{{ doc('order_id_fk') }}"
+        tests:
+          - not_null
+      - name: customer_order_id
+        data_type: string
+        description: "{{ doc('customer_order_id') }}"
+      - name: payment_type
+        data_type: string
+        description: "{{ doc('payment_type') }}"
+      - name: payment_value
+        data_type: float
+        description: "{{ doc('payment_value') }}"
+      - name: payment_installments
+        data_type: integer
+        description: "{{ doc('payment_installments') }}"
+      - name: payment_sequential
+        data_type: integer
+        description: "{{ doc('payment_sequential') }}"
+      - name: payment_number
+        data_type: integer
+        description: "{{ doc('payment_number') }}"
+      - name: total_installments
+        data_type: integer
+        description: "{{ doc('total_installments') }}"
+      - name: cumulative_payment
+        data_type: float
+        description: "{{ doc('cumulative_payment') }}"
+      - name: order_total
+        data_type: float
+        description: "{{ doc('order_total') }}"
+      - name: remaining_balance
+        data_type: float
+        description: "{{ doc('remaining_balance') }}"
+      - name: is_final_payment
+        data_type: boolean
+        description: "{{ doc('is_final_payment') }}"
+      - name: is_overpaid_order
+        data_type: boolean
+        description: "{{ doc('is_overpaid_order') }}"
+      - name: overpaid_amount
+        data_type: float
+        description: "{{ doc('overpaid_amount') }}"
+      - name: payment_progress_pct
+        data_type: float
+        description: "{{ doc('payment_progress_pct') }}"
+      - name: payment_status
+        data_type: string
+        description: "{{ doc('payment_status') }}"
+
+  - name: fct_marketing
+    description: "Fact table containing marketing qualified leads and conversion status."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: mql_id
+        data_type: string
+        description: "{{ doc('mql_id') }}"
+        tests:
+          - not_null
+          - unique
+      - name: seller_id
+        data_type: string
+        description: "{{ doc('seller_id_fk') }}"
+      - name: won_date
+        data_type: date
+        description: "{{ doc('won_date') }}"
+      - name: is_won
+        data_type: boolean
+        description: "{{ doc('is_won') }}"
+
+  - name: fct_order_items
+    description: "Fact table containing order items with enriched order and product details. Each row represents one item within an order."
+    columns:
+      - name: order_item_key
+        description: "{{ doc('order_item_key') }}"
+        tests:
+          - unique
+          - not_null
+      - name: order_item_id
+        description: "{{ doc('order_item_id') }}"
+        tests:
+          - not_null
+      - name: order_id
+        description: "{{ doc('order_id_fk') }}"
+        tests:
+          - not_null
+      - name: product_id
+        description: "{{ doc('product_id_fk') }}"
+        tests:
+          - not_null
+      - name: seller_id
+        description: "{{ doc('seller_id_fk') }}"
+        tests:
+          - not_null
+      - name: customer_order_id
+        description: "{{ doc('customer_order_id') }}"
+        tests:
+          - not_null
+      - name: order_purchase_timestamp
+        description: "{{ doc('order_purchase_timestamp') }}"
+        tests:
+          - not_null
+      - name: order_approved_at
+        description: "{{ doc('order_approved_at') }}"
+      - name: order_delivered_carrier_date
+        description: "{{ doc('order_delivered_carrier_date') }}"
+      - name: order_delivered_customer_date
+        description: "{{ doc('order_delivered_customer_date') }}"
+      - name: order_estimated_delivery_date
+        description: "{{ doc('order_estimated_delivery_date') }}"
+      - name: order_status
+        description: "{{ doc('order_status') }}"
+        tests:
+          - not_null
+      - name: shipping_limit_date
+        description: "{{ doc('shipping_limit_date') }}"
+      - name: price
+        description: "{{ doc('price') }}"
+        tests:
+          - not_null
+      - name: freight_value
+        description: "{{ doc('freight_value') }}"
+        tests:
+          - not_null
+      - name: item_total_value
+        description: "{{ doc('item_total_value') }}"
+        tests:
+          - not_null

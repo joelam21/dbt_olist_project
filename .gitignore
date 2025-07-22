@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 .envrc
 dbt_internal_packages/
+target/
+dbt_packages/
+dbt_modules/
