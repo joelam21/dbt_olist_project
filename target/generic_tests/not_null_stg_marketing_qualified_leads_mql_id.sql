@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="mql_id", model=get_where_subquery(ref('stg_marketing_qualified_leads'))) }}

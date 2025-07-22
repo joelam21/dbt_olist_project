@@ -1,4 +1,9 @@
--- filepath: models/dimensions/dim_customers.sql
+-- File: models/marts/dimensions/dim_customers.sql
+-- materialization is configured at the directory or project level
+-- (see dbt_project.yml under `models:` or `models.marts:`)
+-- remove or override this at the model level only if needed
+-- Purpose: Dimension table for customers, enriched with geolocation data for analytics and reporting.
+-- Note: Joins customer attributes with zipcode geolocation for downstream marts and reporting.
 with base as (
     select
         customer_id as customer_order_id

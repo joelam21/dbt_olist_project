@@ -1,1 +1,0 @@
-{{ test_is_non_negative(column_name="payment_value", model=get_where_subquery(ref('stg_order_payments'))) }}

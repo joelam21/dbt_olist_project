@@ -1,3 +1,10 @@
+-- File: models/marts/dimensions/dim_dates.sql
+-- materialization is set to 'table' in this model due to heavy processing and performance considerations
+-- (see dbt_project.yml under `models:` or `models.marts:`)
+-- remove or override this at the model level only if needed
+-- Purpose: Date dimension table for analytics, providing calendar attributes and flags for reporting.
+-- Note: Uses dbt_utils.date_spine to generate a continuous date range and enriches with date parts and flags.
+
 {{ config(materialized='table') }}
 
 with date_spine as (

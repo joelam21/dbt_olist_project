@@ -1,1 +1,0 @@
-{{ test_is_non_negative(column_name="height_cm", model=get_where_subquery(ref('stg_products'))) }}

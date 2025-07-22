@@ -1,1 +1,0 @@
-{{ test_is_non_negative(column_name="price", model=get_where_subquery(ref('stg_order_items'))) }}

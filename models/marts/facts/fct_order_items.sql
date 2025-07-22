@@ -1,4 +1,9 @@
--- Fact table for order items with enriched order and product details
+-- File: models/marts/facts/fct_order_items.sql
+-- materialization is configured at the directory or project level
+-- (see dbt_project.yml under `models:` or `models.marts:`)
+-- remove or override this at the model level only if needed
+-- Purpose: Fact table for order items, enriched with order and product details for analytics and reporting.
+-- Note: Sourced from int_order_items for standardized and enriched item-level data.
 select
     order_item_key
     , order_item_id

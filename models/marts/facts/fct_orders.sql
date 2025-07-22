@@ -1,5 +1,9 @@
--- File: models/marts/fct_orders.sql
-
+-- File: models/marts/facts/fct_orders.sql
+-- materialization is configured at the directory or project level
+-- (see dbt_project.yml under `models:` or `models.marts:`)
+-- remove or override this at the model level only if needed
+-- Purpose: Fact table for orders, combining order, fulfillment, review, and metrics data for analytics and reporting.
+-- Note: Sourced from staging and intermediate models for a comprehensive order-level fact table.
 
 with orders as (
     select

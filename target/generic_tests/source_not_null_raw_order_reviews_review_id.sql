@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="review_id", model=get_where_subquery(source('raw', 'order_reviews'))) }}

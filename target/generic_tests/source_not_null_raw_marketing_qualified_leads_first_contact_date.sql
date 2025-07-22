@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="first_contact_date", model=get_where_subquery(source('raw', 'marketing_qualified_leads'))) }}

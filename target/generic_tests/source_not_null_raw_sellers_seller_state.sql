@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="seller_state", model=get_where_subquery(source('raw', 'sellers'))) }}

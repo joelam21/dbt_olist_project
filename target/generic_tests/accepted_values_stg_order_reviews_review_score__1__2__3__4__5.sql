@@ -1,1 +1,0 @@
-{{ test_accepted_values(column_name="review_score", model=get_where_subquery(ref('stg_order_reviews')), values=[1,2,3,4,5]) }}

@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="freight_value", model=get_where_subquery(source('raw', 'order_items'))) }}

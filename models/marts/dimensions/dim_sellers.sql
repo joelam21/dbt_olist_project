@@ -1,4 +1,9 @@
--- filepath: models/marts/dimensions/dim_sellers.sql
+-- File: models/marts/dimensions/dim_sellers.sql
+-- materialization is configured at the directory or project level
+-- (see dbt_project.yml under `models:` or `models.marts:`)
+-- remove or override this at the model level only if needed
+-- Purpose: Seller dimension table for analytics, enriched with geolocation data for reporting and analysis.
+-- Note: Joins seller attributes with zipcode geolocation for downstream marts and reporting.
 with base as (
     select
         seller_id

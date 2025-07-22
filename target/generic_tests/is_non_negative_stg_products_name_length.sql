@@ -1,1 +1,0 @@
-{{ test_is_non_negative(column_name="name_length", model=get_where_subquery(ref('stg_products'))) }}

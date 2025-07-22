@@ -1,1 +1,0 @@
-{{ test_not_null(column_name="customer_zip_code_prefix", model=get_where_subquery(source('raw', 'customers'))) }}
