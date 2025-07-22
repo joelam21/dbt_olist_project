@@ -47,7 +47,7 @@ repos:
       - id: sqlfluff-fix
         args:
           - '--dialect=snowflake'
-          - '--exclude-rules=LT02,ST06,LT05'
+          - '--exclude-rules=LT02,ST06,LT05,LT15'
           - '--ignore'
           - 'TMP'
         additional_dependencies: [

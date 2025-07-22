@@ -1,8 +1,6 @@
 -- File: models/intermediate/int_order_payments.sql
 -- Materialization is configured at the directory or project level (see dbt_project.yml under `models:` or `models.intermediate:`)
 -- Remove or override this at the model level only if needed
--- Purpose: Enriches order payments data and prepares for downstream modeling.
--- Note: Add further notes on business logic or data handling as needed.
 with stg_order_payments as (
     select
         order_id
@@ -71,8 +69,32 @@ with stg_order_payments as (
         , customer_id
         , price
         , freight_value
-        , order_total
         , cumulative_payment
         , payment_number
         , total_installments
+        , nullif(order_total, 0) as order_total
+        , 
+    ROUND(
+        COALESCE(nullif(order_total, 0), 0) - COALESCE(nullif(cumulative_payment, 0), 0),
+        2
+    )
+ as remaining_balance
+        , min(
+    ROUND(
+        COALESCE(nullif(order_total, 0), 0) - COALESCE(nullif(cumulative_payment, 0), 0),
+        2
+    )
+) over (partition by order_id) as min_remaining_balance
+        , coalesce(payment_sequential = total_installments, false) as is_final_payment
+        , coalesce(min_remaining_balance < 0, false) as is_overpaid_order
+        , case when remaining_balance < 0 then abs(remaining_balance) else 0 end as overpaid_amount
+        , round(cumulative_payment / nullif(order_total, 0), 2) as payment_progress_pct
+        , case
+            when order_total is null then 'orphaned_payments'
+            when cumulative_payment = 0 then 'unpaid'
+            when round(remaining_balance, 2) < 0 then 'overpaid'
+            when round(remaining_balance, 2) = 0 then 'paid'
+            when round(remaining_balance, 2) > 0 then 'partial'
+            else 'unknown'
+        end as payment_status
     from payments

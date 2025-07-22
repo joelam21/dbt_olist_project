@@ -2,7 +2,6 @@
 -- Materialization is configured at the directory or project level (see dbt_project.yml under `models:` or `models.intermediate:`)
 -- Remove or override this at the model level only if needed
 -- Purpose: Enriches zipcode geolocation data for downstream use.
--- Note: Add further notes on business logic or data handling as needed.
 with stg_geolocation as (
 select
     zip_code

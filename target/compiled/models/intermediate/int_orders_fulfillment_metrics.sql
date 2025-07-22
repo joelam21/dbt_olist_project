@@ -1,7 +1,7 @@
 -- File: models/intermediate/int_orders_fulfillment_metrics.sql
 -- Materialization is configured at the directory or project level (see dbt_project.yml under `models:` or `models.intermediate:`)
 -- Remove or override this at the model level only if needed
-
+-- Purpose: Calculates fulfillment event metrics for each order.
 with max_data_date as (
     select max(order_estimated_delivery_date) as as_of_date
     from dbt_olist_project.DBT_DEV.stg_orders
