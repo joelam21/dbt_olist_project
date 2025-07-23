@@ -111,7 +111,7 @@ jobs:
           echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
 
       - name: Seed data into CI schema
-        if: needs.changes.outputs.seeds == 'true'
+        if: needs.changes.outputs.seeds == 'true'  # filter
         run: |
           source .venv/bin/activate
           dbt seed --target ci
