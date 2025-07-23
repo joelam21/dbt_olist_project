@@ -109,10 +109,10 @@ jobs:
       - name: Run dbt tests (dry run)
         run: |
           source .venv/bin/activate
-          dbt run --target ci --select state:modified+
-          dbt test --target ci --select state:modified+
-          # dbt run --target ci --full-refresh
-          # dbt test --target ci
+          # dbt run --target ci --select state:modified+
+          # dbt test --target ci --select state:modified+
+          dbt run --target ci
+          dbt test --target ci
           echo "✅ dbt tests would run here with isolated CI schema (ci_pr_${{ github.event.number || 'main' }})"
 
   production-deploy:
