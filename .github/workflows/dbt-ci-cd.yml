@@ -20,6 +20,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup dbt profiles with secrets
+        env:
+          DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+          DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+          DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+          DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        run: |
+          # Set up dynamic PR schema, fall back to 'ci_main' if no PR number
+          CI_SCHEMA="ci_pr_${{ github.event.number || 'main' }}"
+          mkdir -p $HOME/.dbt
+          cat > $HOME/.dbt/profiles.yml << EOF
+          dbt_olist_project:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: ${DBT_SNOWFLAKE_ACCOUNT}
+                user: ${DBT_SNOWFLAKE_USER}
+                password: ${DBT_SNOWFLAKE_PASSWORD}
+                role: ${DBT_SNOWFLAKE_ROLE}
+                database: ${DBT_SNOWFLAKE_DATABASE}
+                warehouse: ${DBT_SNOWFLAKE_WAREHOUSE}
+                schema: $CI_SCHEMA
+                threads: 4
+              prod:
+                type: snowflake
+                account: ${DBT_SNOWFLAKE_ACCOUNT}
+                user: ${DBT_SNOWFLAKE_USER}
+                password: ${DBT_SNOWFLAKE_PASSWORD}
+                role: ${DBT_SNOWFLAKE_ROLE}
+                database: ${DBT_SNOWFLAKE_DATABASE}
+                warehouse: ${DBT_SNOWFLAKE_WAREHOUSE}
+                schema: dbt_prod
+                threads: 4
+          EOF
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -107,44 +145,6 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
-
-      - name: Setup dbt profiles with secrets
-        env:
-          DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
-          DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
-          DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
-          DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
-          DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
-          DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
-        run: |
-          # Set up dynamic PR schema, fall back to 'ci_main' if no PR number
-          CI_SCHEMA="ci_pr_${{ github.event.number || 'main' }}"
-          mkdir -p $HOME/.dbt
-          cat > $HOME/.dbt/profiles.yml << EOF
-          dbt_olist_project:
-            target: ci
-            outputs:
-              ci:
-                type: snowflake
-                account: ${DBT_SNOWFLAKE_ACCOUNT}
-                user: ${DBT_SNOWFLAKE_USER}
-                password: ${DBT_SNOWFLAKE_PASSWORD}
-                role: ${DBT_SNOWFLAKE_ROLE}
-                database: ${DBT_SNOWFLAKE_DATABASE}
-                warehouse: ${DBT_SNOWFLAKE_WAREHOUSE}
-                schema: $CI_SCHEMA
-                threads: 4
-              prod:
-                type: snowflake
-                account: ${DBT_SNOWFLAKE_ACCOUNT}
-                user: ${DBT_SNOWFLAKE_USER}
-                password: ${DBT_SNOWFLAKE_PASSWORD}
-                role: ${DBT_SNOWFLAKE_ROLE}
-                database: ${DBT_SNOWFLAKE_DATABASE}
-                warehouse: ${DBT_SNOWFLAKE_WAREHOUSE}
-                schema: dbt_prod
-                threads: 4
-          EOF
 
       - name: Deploy to Production
         run: |
