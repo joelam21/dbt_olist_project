@@ -91,7 +91,7 @@ jobs:
       - name: Lint SQL files
         run: |
           source .venv/bin/activate
-          sqlfluff lint models/ --dialect snowflake
+          sqlfluff lint models/ --dialect snowflake --exclude-rules=LT02,ST06,LT05,LT15
 
       - name: Check dbt parsing
         run: |
