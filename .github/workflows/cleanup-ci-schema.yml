@@ -1,0 +1,39 @@
+name: Cleanup CI Schema
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  drop-ci-schema:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Python Snowflake connector
+        run: pip install snowflake-connector-python
+
+      - name: Drop CI schema for closed PR
+        env:
+          DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+          DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+          DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+          DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        run: |
+          python <<EOF
+          import snowflake.connector
+          pr_number = "${{ github.event.number }}"
+          conn = snowflake.connector.connect(
+              user="${DBT_SNOWFLAKE_USER}",
+              password="${DBT_SNOWFLAKE_PASSWORD}",
+              account="${DBT_SNOWFLAKE_ACCOUNT}",
+              role="${DBT_SNOWFLAKE_ROLE}",
+              warehouse="${DBT_SNOWFLAKE_WAREHOUSE}",
+              database="${DBT_SNOWFLAKE_DATABASE}"
+          )
+          schema = f"ci_pr_{pr_number}"
+          sql = f'DROP SCHEMA IF EXISTS {schema}'
+          print(f"Running: {sql}")
+          conn.cursor().execute(sql)
+          conn.close()
+          EOF
