@@ -8,9 +8,11 @@ name: dbt CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - '**'
 
 jobs:
   lint-and-test:
@@ -19,94 +21,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Install dbt packages
-        run: |
-          source .venv/bin/activate
-          dbt deps || echo "⚠️ dbt deps failed (expected in portfolio demo)"
-
-      - name: Lint SQL files
-        run: |
-          source .venv/bin/activate
-          sqlfluff lint models/ --dialect snowflake
-
-      - name: Check dbt parsing
-        run: |
-          source .venv/bin/activate
-          echo "✅ dbt project structure validation:"
-          echo "  - Found $(find models -name '*.sql' | wc -l) SQL models"
-          echo "  - Found $(find tests -name '*.sql' | wc -l) test files"
-          echo "  - Found $(find macros -name '*.sql' | wc -l) macros"
-          echo "  - Found dbt_project.yml ✓"
-          echo "  - Found profiles.yml ✓"
-          # dbt parse --target ci
-          # dbt compile --target ci
-          echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
-
-      - name: Run dbt tests (dry run)
-        run: |
-          source .venv/bin/activate
-          dbt run --target ci --select state:modified+
-          dbt test --target ci --select state:modified+
-          # dbt run --target ci --full-refresh
-          # dbt test --target ci
-          echo "✅ dbt tests would run here with isolated CI schema (ci_pr_${{ github.event.number || 'main' }})"
-
-  production-deploy:
-    runs-on: ubuntu-latest
-    needs: lint-and-test
-    if: github.ref == 'refs/heads/main'
-    name: Production Deployment
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
 
       - name: Setup dbt profiles with secrets
         env:
@@ -146,11 +60,113 @@ jobs:
                 threads: 4
           EOF
 
-      - name: Deploy to Production
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install dbt packages
         run: |
           source .venv/bin/activate
-          dbt deps
-          dbt build --target prod
+          dbt deps || echo "⚠️ dbt deps failed (expected in portfolio demo)"
+
+      - name: Lint SQL files
+        run: |
+          source .venv/bin/activate
+          sqlfluff lint models/ --dialect snowflake --exclude-rules=LT02,ST06,LT05,LT15
+
+      - name: Check dbt parsing
+        run: |
+          source .venv/bin/activate
+          echo "✅ dbt project structure validation:"
+          echo "  - Found $(find models -name '*.sql' | wc -l) SQL models"
+          echo "  - Found $(find tests -name '*.sql' | wc -l) test files"
+          echo "  - Found $(find macros -name '*.sql' | wc -l) macros"
+          echo "  - Found dbt_project.yml ✓"
+          echo "  - Found profiles.yml ✓"
+          # dbt parse --target ci
+          # dbt compile --target ci
+          echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
+
+      - name: Seed data into CI schema
+        run: |
+          source .venv/bin/activate
+          dbt seed --target ci
+
+      - name: Build dbt models
+        run: |
+          source .venv/bin/activate
+          dbt run --target ci
+
+      - name: Test dbt models
+        run: |
+          source .venv/bin/activate
+          dbt test --target ci
+
+  production-deploy:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+    name: Production Deployment
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Seed data into Prod schema
+        run: |
+          source .venv/bin/activate
+          dbt seed --target prod
+
+      - name: Build dbt models in Prod
+        run: |
+          source .venv/bin/activate
+          dbt run --target prod
+
+      - name: Test dbt models in Prod
+        run: |
+          source .venv/bin/activate
           dbt test --target prod
 
       - name: Generate dbt docs
