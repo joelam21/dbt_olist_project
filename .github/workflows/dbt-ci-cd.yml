@@ -190,7 +190,6 @@ jobs:
           EOF
 
       - name: Seed data into Prod schema
-        if: needs.changes.outputs.seeds == 'true'
         run: |
           source .venv/bin/activate
           dbt seed --target prod
