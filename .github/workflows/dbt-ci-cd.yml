@@ -106,14 +106,20 @@ jobs:
           # dbt compile --target ci
           echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
 
-      - name: Run dbt tests (dry run)
+      - name: Seed data into CI schema
         run: |
           source .venv/bin/activate
-          # dbt run --target ci --select state:modified+
-          # dbt test --target ci --select state:modified+
+          dbt seed --target ci
+
+      - name: Build dbt models
+        run: |
+          source .venv/bin/activate
           dbt run --target ci
+
+      - name: Test dbt models
+        run: |
+          source .venv/bin/activate
           dbt test --target ci
-          echo "✅ dbt tests would run here with isolated CI schema (ci_pr_${{ github.event.number || 'main' }})"
 
   production-deploy:
     runs-on: ubuntu-latest
@@ -148,11 +154,19 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Deploy to Production
+      - name: Seed data into Prod schema
         run: |
           source .venv/bin/activate
-          dbt deps
-          dbt build --target prod
+          dbt seed --target prod
+
+      - name: Build dbt models in Prod
+        run: |
+          source .venv/bin/activate
+          dbt run --target prod
+
+      - name: Test dbt models in Prod
+        run: |
+          source .venv/bin/activate
           dbt test --target prod
 
       - name: Generate dbt docs
