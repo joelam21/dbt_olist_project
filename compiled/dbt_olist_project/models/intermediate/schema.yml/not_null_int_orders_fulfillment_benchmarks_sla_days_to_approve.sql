@@ -1,0 +1,11 @@
+
+    
+    
+
+
+
+select sla_days_to_approve
+from dbt_olist_project.dbt_prod.int_orders_fulfillment_benchmarks
+where sla_days_to_approve is null
+
+

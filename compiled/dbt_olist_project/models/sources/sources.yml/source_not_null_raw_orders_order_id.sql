@@ -1,0 +1,11 @@
+
+    
+    
+
+
+
+select order_id
+from dbt_olist_project.raw.orders
+where order_id is null
+
+

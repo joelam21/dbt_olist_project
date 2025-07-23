@@ -1,0 +1,12 @@
+
+    
+    
+    truncate table "DBT_OLIST_PROJECT"."DBT_PROD"."SLA_THRESHOLDS";
+    -- dbt seed --
+    
+            insert into dbt_olist_project.dbt_prod.sla_thresholds (sla_type, threshold_days, effective_start_date, effective_end_date) values
+            (%s,%s,%s,%s),(%s,%s,%s,%s),(%s,%s,%s,%s),(%s,%s,%s,%s)
+        
+
+;
+  

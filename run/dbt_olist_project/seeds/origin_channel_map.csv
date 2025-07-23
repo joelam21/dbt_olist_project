@@ -1,0 +1,12 @@
+
+    
+    
+    truncate table "DBT_OLIST_PROJECT"."DBT_PROD"."ORIGIN_CHANNEL_MAP";
+    -- dbt seed --
+    
+            insert into dbt_olist_project.dbt_prod.origin_channel_map (ORIGIN, CHANNEL) values
+            (%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s)
+        
+
+;
+  
