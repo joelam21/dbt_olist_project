@@ -95,6 +95,33 @@ docs: update README with setup instructions
 - ✅ `develop` branch created and checked out
 - 🔄 Currently on `develop` branch for ongoing development
 
+## Step 1: Start a New Feature Branch from `develop`
+
+# Git workflow
+## A. Switch to the `develop` branch
+```sh
+git checkout develop
+```
+- What it does: switches your working directory to the develop branch.
+
+- Why: In team/enterprise workflows, develop is typically the integration branch where all new features are built and tested before merging to main (production). Starting from develop ensures your new feature branch has the latest shared work.
+
+```sh
+git pull origin develop
+```
+- What it does: Updates your local develop branch with any changes that have been pushed by teammates to the remote repository (on GitHub) since you last checked.
+
+- Why: Ensures your starting point includes the very latest code, reducing merge conflicts and making sure you’re building on top of the most current codebase.
+
+```sh
+git checkout -b feature/next-feature
+```
+- What it does: Creates a new branch called `feature/next-feature` and immediately switches you to that branch. The `-b` flag tells git to “create branch and switch.”
+
+- Why: All new work (features, bugfixes, enhancements) should be done on a separate branch—not directly on develop or main. This makes your changes isolated, testable, and reviewable before they’re merged into the main codebase.
+
+    Naming convention: feature/ prefix clearly marks this as a feature branch; next-feature should be replaced with a short, descriptive name (e.g., feature/add-user-auth).
+
 ## Next Steps
 1. Set up remote repository (GitHub/GitLab)
 2. Configure branch protection rules
