@@ -122,6 +122,29 @@ git checkout -b feature/next-feature
 
     Naming convention: feature/ prefix clearly marks this as a feature branch; next-feature should be replaced with a short, descriptive name (e.g., feature/add-user-auth).
 
+```sh
+git fetch origin
+```
+- What it does: Updates your local copy of all branches (including develop) from the remote repository (GitHub), but doesn’t modify your working directory or currently checked-out branch.
+
+- Why: Ensures you have the absolute latest version of develop (and any other branches) that teammates may have pushed since your last fetch or pull. This is an essential first step before rebasing or merging.
+
+```sh
+git rebase origin/develop
+```
+- What it does:
+  - Reapplies your feature branch commits on top of the current tip of origin/develop. This creates a cleaner, linear commit history as if you started your branch from the latest develop.
+
+- Why:
+  - Keeps history clean—no merge commits.
+  - Your feature’s commits appear on top of the current develop branch, as if you started work after all recent changes.
+  - Conflict resolution: If there are conflicts, git will pause and ask you to resolve them; after resolving, you run git rebase --continue.
+
+- When to use:
+  - When you want a tidy commit history and are comfortable with resolving rebase conflicts.
+  - Common in teams/projects that value a clean linear history.
+
+
 ## Next Steps
 1. Set up remote repository (GitHub/GitLab)
 2. Configure branch protection rules

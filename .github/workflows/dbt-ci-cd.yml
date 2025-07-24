@@ -15,22 +15,8 @@ on:
       - '**'
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      seeds: ${{ steps.filter.outputs.seeds }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            seeds:
-              - 'seeds/**'
-
   lint-and-test:
     runs-on: ubuntu-latest
-    needs: changes
     name: dbt Lint, Test & Build
     steps:
       - name: Checkout code
@@ -111,7 +97,6 @@ jobs:
           echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
 
       - name: Seed data into CI schema
-        if: needs.changes.outputs.seeds == 'true'  # filter
         run: |
           source .venv/bin/activate
           dbt seed --target ci
@@ -130,7 +115,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint-and-test
-      - changes
     if: github.ref == 'refs/heads/main'
     name: Production Deployment
     environment: production
