@@ -1,10 +1,8 @@
-# Professional dbt CI/CD Pipeline for dbt_olist_project
-# This workflow demonstrates enterprise-grade dbt practices with:
-# - Automated testing and validation
-# - Live production deployment to Snowflake
-# - Documentation deployment to GitHub Pages
-# - Professional DevOps patterns for data engineering
-name: dbt CI/CD Pipeline
+# Full dbt CI/CD Pipeline (Reference Only)
+# This workflow is a reference for a complete dbt CI/CD pipeline with all steps enabled.
+# Do not use for regular runs if you want to save Snowflake credits.
+
+name: dbt CI/CD Pipeline (Full Reference)
 
 on:
   push:
@@ -97,13 +95,19 @@ jobs:
           echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
 
       - name: Seed data into CI schema
-        run: echo "dbt seed --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt seed --target ci
 
       - name: Build dbt models
-        run: echo "dbt run --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt run --target ci
 
       - name: Test dbt models
-        run: echo "dbt test --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt test --target ci
 
   production-deploy:
     runs-on: ubuntu-latest
@@ -168,13 +172,19 @@ jobs:
           EOF
 
       - name: Seed data into Prod schema
-        run: echo "dbt seed --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt seed --target prod
 
       - name: Build dbt models in Prod
-        run: echo "dbt run --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt run --target prod
 
       - name: Test dbt models in Prod
-        run: echo "dbt test --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt test --target prod
 
       - name: Generate dbt docs
         run: |
