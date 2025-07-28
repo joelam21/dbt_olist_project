@@ -108,6 +108,11 @@ jobs:
       - name: Test dbt models
         run: echo "dbt test --target ci (DISABLED to save Snowflake credits)"
 
+  # --- Rollback & Monitoring Patterns (Reference) ---
+  # Rollback: If a deployment causes issues, revert to a previous commit and redeploy via this workflow.
+  # Monitoring: Add notification steps after tests to alert on failures (e.g., Slack, email, etc.).
+  # dbt artifacts (run_results.json, dbt.log) are available in the target/logs folders for auditing.
+  # For advanced monitoring, integrate with data observability tools or custom scripts.
   production-deploy:
     runs-on: ubuntu-latest
     needs:
