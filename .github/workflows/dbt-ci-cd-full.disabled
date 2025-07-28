@@ -1,23 +1,30 @@
-# Professional dbt CI/CD Pipeline for dbt_olist_project
-# This workflow demonstrates enterprise-grade dbt practices with:
-# - Automated testing and validation
-# - Live production deployment to Snowflake
-# - Documentation deployment to GitHub Pages
-# - Professional DevOps patterns for data engineering
-name: dbt CI/CD Pipeline
+# dbt CI/CD Pipeline (Full Reference: dev → staging → prod)
+# This workflow demonstrates a full multi-environment dbt deployment pipeline.
+# It is DISABLED to avoid accidental runs and Snowflake credit usage.
+# To enable, rename this file to end with .yml and adjust triggers as needed.
+#
+# Intended flow:
+#   - On push/PR to develop: run CI jobs (lint, parse, test)
+#   - On merge to develop: deploy to staging
+#   - On PR/merge to main: deploy to production (with optional manual approval)
+#
+# Environments: dev → staging → prod
+
+name: dbt CI/CD Pipeline (Full Reference)
 
 on:
   push:
     branches:
-      - main
-      - develop
-      - 'feature/**'
+      - '**'
   pull_request:
     branches:
-      - main
-      - develop
+      - '**'
 
 jobs:
+
+  # =====================
+  # DEV / CI ENVIRONMENT
+  # =====================
   lint-and-test:
     runs-on: ubuntu-latest
     name: dbt Lint, Test & Build
@@ -100,26 +107,31 @@ jobs:
           echo "✅ Parse validation complete (production would run 'dbt parse --target ci')"
 
       - name: Seed data into CI schema
-        run: echo "dbt seed --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt seed --target ci
 
       - name: Build dbt models
-        run: echo "dbt run --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt run --target ci
 
       - name: Test dbt models
-        run: echo "dbt test --target ci (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt test --target ci
 
-  # --- Rollback & Monitoring Patterns (Reference) ---
-  # Rollback: If a deployment causes issues, revert to a previous commit and redeploy via this workflow.
-  # Monitoring: Add notification steps after tests to alert on failures (e.g., Slack, email, etc.).
-  # dbt artifacts (run_results.json, dbt.log) are available in the target/logs folders for auditing.
-  # For advanced monitoring, integrate with data observability tools or custom scripts.
-  production-deploy:
+
+  # =====================
+  # STAGING ENVIRONMENT
+  # =====================
+  staging-deploy:
     runs-on: ubuntu-latest
     needs:
       - lint-and-test
-    if: github.ref == 'refs/heads/main'
-    name: Production Deployment
-    environment: production
+    if: github.ref == 'refs/heads/develop'
+    name: Staging Deployment
+    environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -156,8 +168,100 @@ jobs:
           DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
           DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
         run: |
-          # Set up dynamic PR schema, fall back to 'ci_main' if no PR number
-          CI_SCHEMA="ci_pr_${{ github.event.number || 'main' }}"
+          mkdir -p $HOME/.dbt
+          cat > $HOME/.dbt/profiles.yml << EOF
+          dbt_olist_project:
+            target: staging
+            outputs:
+              staging:
+                type: snowflake
+                account: ${DBT_SNOWFLAKE_ACCOUNT}
+                user: ${DBT_SNOWFLAKE_USER}
+                password: ${DBT_SNOWFLAKE_PASSWORD}
+                role: ${DBT_SNOWFLAKE_ROLE}
+                database: ${DBT_SNOWFLAKE_DATABASE}
+                warehouse: ${DBT_SNOWFLAKE_WAREHOUSE}
+                schema: dbt_staging
+                threads: 4
+          EOF
+
+      - name: Seed data into Staging schema
+        run: |
+          source .venv/bin/activate
+          dbt seed --target staging
+
+      - name: Build dbt models in Staging
+        run: |
+          source .venv/bin/activate
+          dbt run --target staging
+
+      - name: Test dbt models in Staging
+        run: |
+          source .venv/bin/activate
+          dbt test --target staging
+
+      - name: Notify staging deployment success
+        run: |
+          echo "Staging deployment completed successfully"
+          echo "Models deployed to: ${DBT_SNOWFLAKE_DATABASE}.dbt_staging"
+
+  # =====================
+  # PRODUCTION ENVIRONMENT
+  # =====================
+  production-deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - staging-deploy
+    if: github.ref == 'refs/heads/main'
+    name: Production Deployment
+    environment: production
+    # --- Approval Gate: Manual approval required before production deployment ---
+    # This uses the built-in 'workflow approval' environment protection in GitHub Actions.
+    # See: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
+    # To enable, configure the 'production' environment in your repo settings to require manual approval.
+    # Optionally, you can add an explicit 'wait for approval' job using 'workflow_run' or 'workflow_dispatch' triggers.
+    #
+    # --- Rollback & Monitoring Patterns (Reference) ---
+    # Rollback: If a deployment causes issues, revert to a previous commit and redeploy via this workflow.
+    # Monitoring: Add notification steps after tests to alert on failures (e.g., Slack, email, etc.).
+    # dbt artifacts (run_results.json, dbt.log) are available in the target/logs folders for auditing.
+    # For advanced monitoring, integrate with data observability tools or custom scripts.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Setup dbt profiles with secrets
+        env:
+          DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+          DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+          DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+          DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+          DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+          DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        run: |
           mkdir -p $HOME/.dbt
           cat > $HOME/.dbt/profiles.yml << EOF
           dbt_olist_project:
@@ -176,13 +280,19 @@ jobs:
           EOF
 
       - name: Seed data into Prod schema
-        run: echo "dbt seed --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt seed --target prod
 
       - name: Build dbt models in Prod
-        run: echo "dbt run --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt run --target prod
 
       - name: Test dbt models in Prod
-        run: echo "dbt test --target prod (DISABLED to save Snowflake credits)"
+        run: |
+          source .venv/bin/activate
+          dbt test --target prod
 
       - name: Generate dbt docs
         run: |
