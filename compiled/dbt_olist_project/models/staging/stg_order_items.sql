@@ -10,7 +10,7 @@
 
 with source as (
     select *
-    from dbt_olist_project.raw.order_items
+    from dbt_olist_project.dbt_prod.order_items
 )
 
 , stg_order_items as (

@@ -7,7 +7,7 @@
 -- Primary key: product_id
 
 with source as (
-    select * from dbt_olist_project.raw.products
+    select * from dbt_olist_project.dbt_prod.products
 )
 
 , stg_products as (

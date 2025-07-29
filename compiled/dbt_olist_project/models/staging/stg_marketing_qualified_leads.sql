@@ -7,7 +7,7 @@
 -- Primary key: mql_id
 
 with source as (
-    select * from dbt_olist_project.raw.marketing_qualified_leads
+    select * from dbt_olist_project.dbt_prod.marketing_qualified_leads
 )
 
 , stg_marketing_qualified_leads as (

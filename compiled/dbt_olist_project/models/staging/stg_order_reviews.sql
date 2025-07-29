@@ -8,7 +8,7 @@
 
 with source as (
     select *
-    from dbt_olist_project.raw.order_reviews
+    from dbt_olist_project.dbt_prod.order_reviews
 )
 
 , stg_order_reviews as (

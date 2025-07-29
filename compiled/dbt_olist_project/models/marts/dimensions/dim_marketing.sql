@@ -17,8 +17,8 @@ select
     , business_segment
     , lead_type
     , lead_behaviour_profile
-    , has_company
-    , has_gtin
+    , cast(has_company as boolean) as has_company
+    , cast(has_gtin as boolean) as has_gtin
     , average_stock
     , business_type
 from dbt_olist_project.dbt_prod.int_closed_deals_enriched

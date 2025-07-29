@@ -8,7 +8,7 @@
 
 with source as (
     select *
-    from dbt_olist_project.raw.geolocation
+    from dbt_olist_project.dbt_prod.geolocation
 )
 
 , stg_geolocation as (

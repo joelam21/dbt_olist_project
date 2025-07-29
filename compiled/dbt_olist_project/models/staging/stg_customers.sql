@@ -13,7 +13,7 @@ with source as (
         , customer_zip_code_prefix
         , customer_city
         , customer_state
-    from dbt_olist_project.raw.customers
+    from dbt_olist_project.dbt_prod.customers
 )
 
 , stg_customers as (

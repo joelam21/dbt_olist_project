@@ -72,14 +72,14 @@ with orders as (
         , fulfillment.order_delivered_carrier_date
         , fulfillment.order_delivered_customer_date
         , fulfillment.order_estimated_delivery_date
-        , fulfillment.days_to_approve
-        , fulfillment.days_to_carrier
-        , fulfillment.days_to_customer
+        , cast(fulfillment.days_to_approve as NUMBER(38, 0)) as days_to_approve
+        , cast(fulfillment.days_to_carrier as NUMBER(38, 0)) as days_to_carrier
+        , cast(fulfillment.days_to_customer as NUMBER(38, 0)) as days_to_customer
         , fulfillment.sla_days_to_approve
         , fulfillment.sla_days_to_carrier
         , fulfillment.sla_days_to_last_mile
-        , fulfillment.delivery_window_days
-        , fulfillment.delivery_days
+        , cast(fulfillment.delivery_window_days as NUMBER(38, 0)) as delivery_window_days
+        , cast(fulfillment.delivery_days as NUMBER(38, 0)) as delivery_days
         , fulfillment.delivered_on_time
         , fulfillment.approval_sla_breached
         , fulfillment.carrier_sla_breached
@@ -88,10 +88,10 @@ with orders as (
         -- Review
         , reviews.review_score
         -- Order metrics
-        , order_metrics.num_items
-        , order_metrics.price_total
-        , order_metrics.freight_total
-        , order_metrics.order_total
+        , cast(order_metrics.num_items as NUMBER(38, 0)) as num_items
+        , cast(order_metrics.price_total as FLOAT) as price_total
+        , cast(order_metrics.freight_total as FLOAT) as freight_total
+        , cast(order_metrics.order_total as FLOAT) as order_total
     from orders
         left join order_metrics on orders.order_id = order_metrics.order_id
         left join reviews on orders.order_id = reviews.order_id

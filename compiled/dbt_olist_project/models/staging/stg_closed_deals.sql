@@ -7,7 +7,7 @@
 
 with source as (
     select *
-    from dbt_olist_project.raw.closed_deals
+    from dbt_olist_project.dbt_prod.closed_deals
 )
 
 , stg_closed_deals as (
