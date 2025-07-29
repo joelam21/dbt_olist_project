@@ -10,7 +10,7 @@
 
 with source as (
     select *
-    from {{ source('raw', 'order_items') }}
+    from {{ ref('order_items') }}
 )
 
 , stg_order_items as (

@@ -17,3 +17,7 @@ models:
     +materialized: table
   marts:
     +materialized: view
+
+
+snapshots:
+  +schema: SNAPSHOTS

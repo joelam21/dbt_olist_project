@@ -20,8 +20,8 @@ select
     , b.customer_zip_code
     , b.customer_city
     , b.customer_state
-    , g.lat as customer_lat
-    , g.lng as customer_lng
+    , cast(g.lat as float) as customer_lat
+    , cast(g.lng as float) as customer_lng
 from base as b
 left join {{ ref('int_zipcode_geolocation') }} as g
     on b.customer_zip_code = g.zip_code
