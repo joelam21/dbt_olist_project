@@ -13,7 +13,7 @@ with source as (
         , customer_zip_code_prefix
         , customer_city
         , customer_state
-    from {{ source('raw', 'customers') }}
+    from {{ ref('customers') }}
 )
 
 , stg_customers as (

@@ -17,8 +17,8 @@ select
     , business_segment
     , lead_type
     , lead_behaviour_profile
-    , has_company
-    , has_gtin
+    , cast(has_company as boolean) as has_company
+    , cast(has_gtin as boolean) as has_gtin
     , average_stock
     , business_type
 from {{ ref('int_closed_deals_enriched') }}

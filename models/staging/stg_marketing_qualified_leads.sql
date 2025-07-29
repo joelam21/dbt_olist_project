@@ -7,7 +7,7 @@
 -- Primary key: mql_id
 
 with source as (
-    select * from {{ source('raw', 'marketing_qualified_leads') }}
+    select * from {{ ref('marketing_qualified_leads') }}
 )
 
 , stg_marketing_qualified_leads as (
