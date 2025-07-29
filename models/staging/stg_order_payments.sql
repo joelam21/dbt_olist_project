@@ -10,7 +10,7 @@
 
 with source as (
     select *
-    from {{ source('raw', 'order_payments') }}
+    from {{ ref('order_payments') }}
 )
 
 , stg_order_payments as (

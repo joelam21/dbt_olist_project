@@ -7,7 +7,7 @@
 
 with source as (
     select *
-    from {{ source('raw', 'closed_deals') }}
+    from {{ ref('closed_deals') }}
 )
 
 , stg_closed_deals as (

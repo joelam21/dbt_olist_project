@@ -8,7 +8,7 @@
 
 with source as (
     select *
-    from {{ source('raw', 'geolocation') }}
+    from {{ ref('geolocation') }}
 )
 
 , stg_geolocation as (

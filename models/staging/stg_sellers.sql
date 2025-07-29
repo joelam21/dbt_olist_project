@@ -8,7 +8,7 @@
 
 with source as (
     select *
-    from {{ source('raw', 'sellers') }}
+    from {{ ref('sellers') }}
 )
 
 , stg_sellers as (

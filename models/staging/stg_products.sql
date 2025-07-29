@@ -7,7 +7,7 @@
 -- Primary key: product_id
 
 with source as (
-    select * from {{ source('raw', 'products') }}
+    select * from {{ ref('products') }}
 )
 
 , stg_products as (
