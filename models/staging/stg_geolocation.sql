@@ -14,11 +14,11 @@ with source as (
 , stg_geolocation as (
     select
         {{ generate_surrogate_key([
-        pad_zip('geolocation_zip_code_prefix'),
-        'geolocation_lat',
-        'geolocation_lng',
-        'geolocation_city',
-        'geolocation_state']) }} as geolocation_key
+        pad_zip('geolocation_zip_code_prefix')
+        , 'geolocation_lat'
+        , 'geolocation_lng'
+        , 'geolocation_city'
+        , 'geolocation_state']) }} as geolocation_key
         , {{ pad_zip('geolocation_zip_code_prefix') }} as zip_code
         , geolocation_lat as lat
         , geolocation_lng as lng
