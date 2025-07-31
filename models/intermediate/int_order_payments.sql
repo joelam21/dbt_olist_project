@@ -14,10 +14,11 @@ with stg_order_payments as (
 , int_order_items as (
     select
         order_id
-        , customer_id
-        , price
-        , freight_value
+        , max(customer_id) as customer_id
+        , sum(price) as price
+        , sum(freight_value) as freight_value
     from {{ ref('int_order_items') }}
+    group by order_id
 )
 
 , orders_aggregated as (

@@ -5,7 +5,7 @@
 -- Purpose: Date dimension table for analytics, providing calendar attributes and flags for reporting.
 -- Note: Uses dbt_utils.date_spine to generate a continuous date range and enriches with date parts and flags.
 
-{{ config(materialized='table') }}
+{{ config(materialized='table', static_analysis='unsafe') }}
 
 with date_spine as (
     {{ dbt_utils.date_spine(
