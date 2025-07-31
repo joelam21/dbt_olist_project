@@ -1,12 +1,12 @@
 version: 2
 
 sources:
-  - name: raw
+  - name: dbt_dev
     description: >
       Simulated source layer — these tables were originally loaded from CSVs,
       but are being treated as sources to mirror a production ingestion pipeline.
     database: dbt_olist_project
-    schema: raw
+    schema: dbt_dev
     tables:
       - name: customers
         description: |

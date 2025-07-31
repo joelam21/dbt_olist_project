@@ -1,0 +1,20 @@
+version: 2
+
+exposures:
+  - name: payments_insights_dashboard
+    label: "Payments Insights Dashboard"
+    type: dashboard
+    maturity: high
+    url: https://your-bi-tool.com/dashboard/payments-insights
+    description: |
+      This dashboard provides detailed analysis of payment status, payment types, and installment patterns for customer orders.
+      It summarizes payment completion rates, overpayments, and remaining balances, and breaks down payment value by type (credit card, boleto, voucher, etc.) and installment structure.
+      The dashboard enables finance and operations teams to monitor payment health, track installment usage, and identify trends in payment behavior and outstanding balances.
+      Key features include payment status summaries, payment type and installment breakdowns, and a detailed payments records table for operational review.
+    depends_on:
+      - ref('fct_order_payments')
+      - ref('dim_customers')
+      - ref('fct_orders')
+    owner:
+      name: Joe Lam
+      email: joelam21@gmail.com
