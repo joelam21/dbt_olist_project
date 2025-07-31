@@ -1,0 +1,21 @@
+version: 2
+
+exposures:
+  - name: sales_fulfillment_dashboard
+    label: "Sales & Fulfillment Dashboard"
+    type: dashboard
+    maturity: high
+    url: https://your-bi-tool.com/dashboard/sales-orders
+    description: |
+      This dashboard provides comprehensive insights into order sales, fulfillment performance, and delivery timeliness.
+      It visualizes weekly sales trends, on-time delivery rates, and fulfillment delays by region and time period.
+      Key features include sales by week, state, and city, review scores, SLA breach analysis, and geospatial mapping of delivery performance.
+      The dashboard enables sales and operations teams to monitor business health, identify fulfillment bottlenecks, and optimize customer satisfaction.
+    depends_on:
+      - ref('fct_orders')
+      - ref('dim_customers')
+      - ref('dim_products')
+      - ref('dim_sellers')
+    owner:
+      name: Joe Lam
+      email: joelam21@gmail.com

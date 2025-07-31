@@ -1,4 +1,7 @@
 .venv/
+.venv3/
+venv/
+dbt_olist_project/venv*/
 .env
 __pycache__/
 *.pyc
@@ -10,3 +13,4 @@ dbt_internal_packages/
 target/
 dbt_packages/
 dbt_modules/
+logs/

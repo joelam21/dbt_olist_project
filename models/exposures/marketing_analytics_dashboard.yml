@@ -1,0 +1,19 @@
+version: 2
+
+exposures:
+  - name: marketing_analytics_dashboard
+    label: "Marketing Analytics Dashboard"
+    type: dashboard
+    maturity: medium
+    url: https://your-bi-tool.com/dashboard/marketing-analytics
+    description: |
+      This dashboard provides insights into marketing win rates, landing page and channel performance, and lead conversion outcomes.
+      It visualizes monthly and channel win rates, highlights top-performing landing pages, and enables the marketing and sales teams to analyze which channels and landing pages drive the most successful deals.
+      The dashboard supports optimization of marketing strategies and resource allocation by surfacing trends in lead-to-win conversion and channel effectiveness.
+    depends_on:
+      - ref('fct_marketing')
+      - ref('dim_marketing')
+      - ref('dim_sellers')
+    owner:
+      name: Joe Lam
+      email: joelam21@gmail.com
