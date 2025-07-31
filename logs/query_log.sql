@@ -1,4 +1,4 @@
--- created_at: 2025-07-31T04:59:11.221514+00:00
+-- created_at: 2025-07-31T20:17:04.093245+00:00
 -- dialect: snowflake
 -- node_id: model.dbt_olist_project.dim_dates
 -- desc: execute adapter call
