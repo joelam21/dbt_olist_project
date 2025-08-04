@@ -5,7 +5,7 @@ exposures:
     label: "Sales & Fulfillment Dashboard"
     type: dashboard
     maturity: high
-    url: https://your-bi-tool.com/dashboard/sales-orders
+    url: https://public.tableau.com/app/profile/joe.lam1433/viz/dbt_olist_simulation/OlistE-CommerceDashboards
     description: |
       This dashboard provides comprehensive insights into order sales, fulfillment performance, and delivery timeliness.
       It visualizes weekly sales trends, on-time delivery rates, and fulfillment delays by region and time period.
