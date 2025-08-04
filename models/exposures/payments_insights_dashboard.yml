@@ -5,7 +5,7 @@ exposures:
     label: "Payments Insights Dashboard"
     type: dashboard
     maturity: high
-    url: https://your-bi-tool.com/dashboard/payments-insights
+    url: https://public.tableau.com/app/profile/joe.lam1433/viz/dbt_olist_simulation/OlistE-CommerceDashboards
     description: |
       This dashboard provides detailed analysis of payment status, payment types, and installment patterns for customer orders.
       It summarizes payment completion rates, overpayments, and remaining balances, and breaks down payment value by type (credit card, boleto, voucher, etc.) and installment structure.

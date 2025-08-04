@@ -5,7 +5,7 @@ exposures:
     label: "Marketing Analytics Dashboard"
     type: dashboard
     maturity: medium
-    url: https://your-bi-tool.com/dashboard/marketing-analytics
+    url: https://public.tableau.com/app/profile/joe.lam1433/viz/dbt_olist_simulation/OlistE-CommerceDashboards
     description: |
       This dashboard provides insights into marketing win rates, landing page and channel performance, and lead conversion outcomes.
       It visualizes monthly and channel win rates, highlights top-performing landing pages, and enables the marketing and sales teams to analyze which channels and landing pages drive the most successful deals.
