@@ -31,14 +31,14 @@ Before dbt, I understood the importance of modularity, reproducibility, and scal
 
 ## Advanced Roadmap & In-Progress Features
 
-This project is being built and documented to the standards of a high-performing data team. Advanced implementation phases are underway, including:
+This project is being built and documented to the standards of a high-performing data team. Advanced implementation phases include:
 
-- [ ] **CI/CD Environment Promotion:** Automated flows from dev → staging → prod, with approval gates and rollback procedures for safer deployments.
-- [ ] **Incremental Models & Snapshots:** Efficient updates for large tables and SCD Type 2 dimension tracking.
+- [x] **CI/CD Environment Promotion:** Automated flows from dev → staging → prod.
+- [x] **Incremental Models & Snapshots:** Efficient updates for large tables and SCD Type 2 dimension tracking.
 - [x] **Custom Macros:** Reusable business logic and advanced data quality checks.
-- [ ] **Exposures:** Documentation connecting models to downstream BI and stakeholder dashboards.
+- [x] **Exposures:** Documentation connecting models to downstream BI and stakeholder dashboards.
 - [ ] **Monitoring & Observability:** Model run auditing (dbt post-hooks), pipeline monitoring, cost/performance tracking, and alerting.
-- [ ] **Comprehensive Testing:** Generic, custom, and business rule validations targeting >90% coverage.
+- [x] **Comprehensive Testing:** Generic, custom, and contract tests
 - [ ] **Team Collaboration & Governance:** Code review standards, data governance policies, issue/project templates, and contribution guidelines for team scaling.
 
 ---
@@ -53,7 +53,7 @@ Building this project helped me connect the dots between analytics theory and re
 
 - **Hiring managers:** Review the pipeline, CI/CD workflow, and docs for evidence of production-grade skills and modern best practices.
 - **Peers and learners:** Fork or clone for your own projects, or adapt the setup guides for team onboarding.
-- **Feedback is welcome:** Open an issue or pull request to suggest improvements, or connect on [LinkedIn](your-link-here).
+- **Feedback is welcome:** Open an issue or pull request to suggest improvements.
 
 ---
 
@@ -74,3 +74,6 @@ Building this project helped me connect the dots between analytics theory and re
 
 
 ---
+## Resources
+
+https://public.tableau.com/app/profile/joe.lam1433/vizzes
